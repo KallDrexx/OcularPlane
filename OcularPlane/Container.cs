@@ -10,7 +10,7 @@ namespace OcularPlane
 
         public void AddObject(object obj, string name)
         {
-            _objects.TryAdd(name, obj);
+            _objects.AddOrUpdate(name, obj, (key, oldObject) => obj);
         }
 
         public InstanceReference[] GetInstances()
