@@ -42,6 +42,8 @@
   <ItemGroup>
     <Compile Include="Container.cs" />
     <Compile Include="ContainerManager.cs" />
+    <Compile Include="Exceptions\InvalidValueConversionException.cs" />
+    <Compile Include="Exceptions\PropertyDoesntExistException.cs" />
     <Compile Include="InternalModels\TrackedInstance.cs" />
     <Compile Include="Models\InstanceDetails.cs" />
     <Compile Include="Models\InstanceReference.cs" />

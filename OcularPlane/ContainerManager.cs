@@ -44,5 +44,14 @@ namespace OcularPlane
             return _containers.Select(x => x.Value.GetInstanceDetails(instanceId))
                 .SingleOrDefault();
         }
+
+        public void SetPropertyValue(Guid instanceId, string propertyName, string value)
+        {
+            // TODO: Cache container<->InstanceId assocaition
+            foreach (var containerPair in _containers)
+            {
+                containerPair.Value.SetInstancePropertyValue(instanceId, propertyName, value);
+            }
+        }
     }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using OcularPlane.Exceptions;
 using OcularPlane.InternalModels;
 using OcularPlane.Models;
 
@@ -43,6 +45,76 @@ namespace OcularPlane
                     Properties = x.Value.GetProperties()
                 })
                 .SingleOrDefault();
+        }
+
+        public void SetInstancePropertyValue(Guid instanceId, string propertyName, string value)
+        {
+            var instance = _objects.Where(x => x.Value.Id == instanceId)
+                .Select(x => x.Value)
+                .SingleOrDefault();
+
+            if (instance == null)
+            {
+                // We don't have this instance.  May need to eventually throw here but for now let it pass
+                return;
+            }
+
+            var property = instance.RawObject
+                .GetType()
+                .GetProperties()
+                .Where(x => x.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+                .SingleOrDefault();
+
+            if (property == null)
+            {
+                throw new PropertyDoesntExistException(instance.RawObject.GetType(), propertyName);
+            }
+
+            var typeCode = GetCodeForType(property.PropertyType);
+            if (typeCode != TypeCode.Empty)
+            {
+                object convertedValue;
+
+                try
+                {
+                    convertedValue = Convert.ChangeType(value, typeCode);
+                }
+                catch
+                {
+                    throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, property.PropertyType, value);
+                }
+
+                property.SetValue(instance.RawObject, convertedValue);
+            }
+        }
+
+        private static TypeCode GetCodeForType(Type type)
+        {
+            var map = new Dictionary<Type, TypeCode>
+            {
+                {typeof (bool), TypeCode.Boolean},
+                {typeof (byte), TypeCode.Byte},
+                {typeof (char), TypeCode.Char},
+                {typeof (DateTime), TypeCode.DateTime},
+                {typeof (DBNull), TypeCode.DBNull},
+                {typeof (decimal), TypeCode.Decimal},
+                {typeof (double), TypeCode.Double},
+                {typeof (short), TypeCode.Int16},
+                {typeof (int), TypeCode.Int32},
+                {typeof (long), TypeCode.Int64},
+                {typeof (object), TypeCode.Object},
+                {typeof (sbyte), TypeCode.SByte},
+                {typeof (Single), TypeCode.Single},
+                {typeof (string), TypeCode.String},
+                {typeof (UInt16), TypeCode.UInt16},
+                {typeof (UInt32), TypeCode.UInt32},
+                {typeof (UInt64), TypeCode.UInt64}
+            };
+
+            TypeCode code;
+            return map.TryGetValue(type, out code)
+                ? code
+                : TypeCode.Empty;
         }
     }
 }

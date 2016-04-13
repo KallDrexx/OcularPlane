@@ -30,5 +30,15 @@ namespace OcularPlane.InternalModels
                 })
                 .ToArray();
         }
+
+        public void SetPropertyValue(string propertyName, string value)
+        {
+            var property = RawObject.GetType()
+                .GetProperties()
+                .Where(x => x.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
+                .SingleOrDefault();
+
+            
+        }
     }
 }
