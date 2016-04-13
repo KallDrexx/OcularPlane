@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Xunit;
 
 namespace OcularPlane.Tests
@@ -32,6 +27,7 @@ namespace OcularPlane.Tests
             results.Length.Should().Be(1);
             results[0].Should().NotBeNull();
             results[0].Name.Should().Be("obj");
+            results[0].Type.Should().Be(this.GetType());
         }
 
         [Fact]

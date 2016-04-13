@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using OcularPlane.Models;
 
 namespace OcularPlane
@@ -16,9 +15,17 @@ namespace OcularPlane
 
         public InstanceReference[] GetInstances()
         {
-            return _objects.Keys
-                .Select(x => new InstanceReference {Name = x})
-                .ToArray();
+            var results = new List<InstanceReference>();
+            foreach (var pair in _objects)
+            {
+                results.Add(new InstanceReference
+                {
+                    Name = pair.Key,
+                    Type = pair.Value.GetType()
+                });
+            }
+
+            return results.ToArray();
         }
     }
 }
