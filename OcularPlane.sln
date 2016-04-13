@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OcularPlane", "OcularPlane\OcularPlane.csproj", "{8636D1CA-F1AE-4A41-8C52-DF9CBE75FA0D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OcularPlane.Tests", "OcularPlane.Tests\OcularPlane.Tests.csproj", "{A85CEE95-7571-4687-BB73-FB210547C5BC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8636D1CA-F1AE-4A41-8C52-DF9CBE75FA0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8636D1CA-F1AE-4A41-8C52-DF9CBE75FA0D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8636D1CA-F1AE-4A41-8C52-DF9CBE75FA0D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A85CEE95-7571-4687-BB73-FB210547C5BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A85CEE95-7571-4687-BB73-FB210547C5BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A85CEE95-7571-4687-BB73-FB210547C5BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A85CEE95-7571-4687-BB73-FB210547C5BC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
