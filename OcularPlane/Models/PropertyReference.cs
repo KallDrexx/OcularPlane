@@ -2,10 +2,10 @@
 
 namespace OcularPlane.Models
 {
-    public class InstanceReference
+    public class PropertyReference
     {
-        public Guid InstanceId { get; set; }
         public string Name { get; set; }
+        public string ValueAsString { get; set; }
         public Type Type { get; set; }
     }
 }

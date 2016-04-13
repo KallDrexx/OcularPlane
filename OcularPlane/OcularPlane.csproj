@@ -42,7 +42,10 @@
   <ItemGroup>
     <Compile Include="Container.cs" />
     <Compile Include="ContainerManager.cs" />
+    <Compile Include="InternalModels\TrackedInstance.cs" />
+    <Compile Include="Models\InstanceDetails.cs" />
     <Compile Include="Models\InstanceReference.cs" />
+    <Compile Include="Models\PropertyReference.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

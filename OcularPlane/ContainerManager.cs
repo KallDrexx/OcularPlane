@@ -1,4 +1,5 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Linq;
 using OcularPlane.Models;
 
@@ -35,6 +36,13 @@ namespace OcularPlane
             return container != null
                 ? container.GetInstances()
                 : new InstanceReference[0];
+        }
+
+        public InstanceDetails GetInstanceDetails(Guid instanceId)
+        {
+            // TODO: Implement caching for performance
+            return _containers.Select(x => x.Value.GetInstanceDetails(instanceId))
+                .SingleOrDefault();
         }
     }
 }
