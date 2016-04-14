@@ -28,7 +28,7 @@ namespace OcularPlane
                 {
                     InstanceId = pair.Value.Id,
                     Name = pair.Key,
-                    Type = pair.Value.RawObject.GetType()
+                    TypeName = pair.Value.RawObject.GetType().FullName
                 });
             }
 

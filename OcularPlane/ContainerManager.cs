@@ -42,6 +42,7 @@ namespace OcularPlane
         {
             // TODO: Implement caching for performance
             return _containers.Select(x => x.Value.GetInstanceDetails(instanceId))
+                .Where(x => x != null)
                 .SingleOrDefault();
         }
 

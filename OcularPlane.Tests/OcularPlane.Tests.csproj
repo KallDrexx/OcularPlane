@@ -72,6 +72,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\OcularPlane.Models\OcularPlane.Models.csproj">
+      <Project>{aa2b8eeb-f004-4832-a67e-1c6b8ab8636b}</Project>
+      <Name>OcularPlane.Models</Name>
+    </ProjectReference>
     <ProjectReference Include="..\OcularPlane\OcularPlane.csproj">
       <Project>{8636d1ca-f1ae-4a41-8c52-df9cbe75fa0d}</Project>
       <Name>OcularPlane</Name>

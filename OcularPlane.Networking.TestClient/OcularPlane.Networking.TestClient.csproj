@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8636D1CA-F1AE-4A41-8C52-DF9CBE75FA0D}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{0CB27099-5B6A-4087-AB4A-CB56F7375192}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OcularPlane</RootNamespace>
-    <AssemblyName>OcularPlane</AssemblyName>
+    <RootNamespace>OcularPlane.Networking.TestClient</RootNamespace>
+    <AssemblyName>OcularPlane.Networking.TestClient</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -40,18 +43,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Container.cs" />
-    <Compile Include="ContainerManager.cs" />
-    <Compile Include="Exceptions\InvalidValueConversionException.cs" />
-    <Compile Include="Exceptions\NoKnownWayToParseToTypeException.cs" />
-    <Compile Include="Exceptions\PropertyDoesntExistException.cs" />
-    <Compile Include="InternalModels\TrackedInstance.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OcularPlane.Models\OcularPlane.Models.csproj">
       <Project>{aa2b8eeb-f004-4832-a67e-1c6b8ab8636b}</Project>
       <Name>OcularPlane.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OcularPlane.Networking.WcfTcp.Client\OcularPlane.Networking.WcfTcp.Client.csproj">
+      <Project>{31b48268-6511-42a2-aeed-7caccf1a6a0a}</Project>
+      <Name>OcularPlane.Networking.WcfTcp.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

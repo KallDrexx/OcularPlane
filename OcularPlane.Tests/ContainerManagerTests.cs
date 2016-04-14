@@ -30,7 +30,7 @@ namespace OcularPlane.Tests
             results.Length.Should().Be(1);
             results[0].Should().NotBeNull();
             results[0].Name.Should().Be("obj");
-            results[0].Type.Should().Be(this.GetType());
+            results[0].TypeName.Should().Be(this.GetType().FullName);
             results[0].InstanceId.Should().NotBe(Guid.Empty);
         }
 
@@ -89,7 +89,7 @@ namespace OcularPlane.Tests
             results.Length.Should().Be(1);
             results[0].Should().NotBeNull();
             results[0].Name.Should().Be("obj");
-            results[0].Type.Should().Be(typeof(TestClass));
+            results[0].TypeName.Should().Be(typeof(TestClass).FullName);
             results[0].InstanceId.Should().NotBe(instanceId);
         }
 
@@ -138,11 +138,11 @@ namespace OcularPlane.Tests
             details.Properties.Length.Should().Be(2);
 
             var stringProperty = details.Properties.Single(x => x.Name == nameof(TestClass.StringProperty));
-            stringProperty.Type.Should().Be(typeof (string));
+            stringProperty.TypeName.Should().Be(typeof (string).FullName);
             stringProperty.ValueAsString.Should().Be(testObject.StringProperty);
 
             var numberProperty = details.Properties.Single(x => x.Name == nameof(TestClass.NumberProperty));
-            numberProperty.Type.Should().Be(typeof (int));
+            numberProperty.TypeName.Should().Be(typeof (int).FullName);
             numberProperty.ValueAsString.Should().Be(testObject.NumberProperty.ToString());
         }
 

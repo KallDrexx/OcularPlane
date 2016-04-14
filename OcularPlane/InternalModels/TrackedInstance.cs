@@ -25,7 +25,7 @@ namespace OcularPlane.InternalModels
                 .Select(x => new PropertyReference
                 {
                     Name = x.Name,
-                    Type = x.PropertyType,
+                    TypeName = x.PropertyType.FullName,
                     ValueAsString = Convert.ToString(x.GetValue(RawObject))
                 })
                 .ToArray();

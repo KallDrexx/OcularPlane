@@ -6,6 +6,6 @@ namespace OcularPlane.Models
     {
         public Guid InstanceId { get; set; }
         public string Name { get; set; }
-        public Type Type { get; set; }
+        public string TypeName { get; set; }
     }
 }

@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{8636D1CA-F1AE-4A41-8C52-DF9CBE75FA0D}</ProjectGuid>
+    <ProjectGuid>{31B48268-6511-42A2-AEED-7CACCF1A6A0A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OcularPlane</RootNamespace>
-    <AssemblyName>OcularPlane</AssemblyName>
+    <RootNamespace>OcularPlane.Networking.WcfTcp.Client</RootNamespace>
+    <AssemblyName>OcularPlane.Networking.WcfTcp.Client</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.ServiceModel" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -40,18 +41,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Container.cs" />
-    <Compile Include="ContainerManager.cs" />
-    <Compile Include="Exceptions\InvalidValueConversionException.cs" />
-    <Compile Include="Exceptions\NoKnownWayToParseToTypeException.cs" />
-    <Compile Include="Exceptions\PropertyDoesntExistException.cs" />
-    <Compile Include="InternalModels\TrackedInstance.cs" />
+    <Compile Include="OcularPlaneClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OcularPlane.Models\OcularPlane.Models.csproj">
       <Project>{aa2b8eeb-f004-4832-a67e-1c6b8ab8636b}</Project>
       <Name>OcularPlane.Models</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\OcularPlane.Networking.WcfTcp.Common\OcularPlane.Networking.WcfTcp.Common.csproj">
+      <Project>{1EBC938B-8945-40E3-AF27-6F0FAE03F293}</Project>
+      <Name>OcularPlane.Networking.WcfTcp.Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
