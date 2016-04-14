@@ -146,10 +146,33 @@ namespace OcularPlane.Tests
             numberProperty.ValueAsString.Should().Be(testObject.NumberProperty.ToString());
         }
 
+        [Fact]
+        public void Fields_Are_Included_In_Instance_Details()
+        {
+            var containerManager = new ContainerManager();
+            var testObject = new ClassWithField {IntField = 1};
+
+            containerManager.AddObjectToContainer("container", testObject, "obj");
+            var reference = containerManager.GetInstancesInContainer("container")
+                .Single(x => x.Name == "obj");
+
+            var details = containerManager.GetInstanceDetails(reference.InstanceId);
+
+            details.Should().NotBeNull();
+            details.Properties.Length.Should().Be(1);
+            details.Properties[0].Name.Should().Be(nameof(ClassWithField.IntField));
+            details.Properties[0].ValueAsString.Should().Be("1");
+        }
+
         private class TestClass
         {
             public string StringProperty { get; set; }
             public int NumberProperty { get; set; }
+        }
+
+        private class ClassWithField
+        {
+            public int IntField;
         }
     }
 }
