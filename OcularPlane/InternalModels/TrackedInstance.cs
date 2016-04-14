@@ -20,7 +20,7 @@ namespace OcularPlane.InternalModels
         public PropertyReference[] GetProperties()
         {
             // TODO: Should cache for performance
-            return RawObject.GetType()
+            var properties = RawObject.GetType()
                 .GetProperties()
                 .Select(x => new PropertyReference
                 {
@@ -28,17 +28,23 @@ namespace OcularPlane.InternalModels
                     TypeName = x.PropertyType.FullName,
                     ValueAsString = Convert.ToString(x.GetValue(RawObject))
                 })
-                .ToArray();
-        }
+                .ToList();
 
-        public void SetPropertyValue(string propertyName, string value)
-        {
-            var property = RawObject.GetType()
-                .GetProperties()
-                .Where(x => x.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
-                .SingleOrDefault();
+            var fields = RawObject.GetType()
+                .GetFields()
+                .Select(x => new PropertyReference
+                {
+                    Name = x.Name,
+                    TypeName = x.FieldType.FullName,
+                    ValueAsString = Convert.ToString(x.GetValue(RawObject))
+                })
+                .ToList();
 
+            properties.AddRange(fields);
             
+            return properties.ToArray();
+
         }
+
     }
 }

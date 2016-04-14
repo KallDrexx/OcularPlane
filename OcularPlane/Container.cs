@@ -59,62 +59,118 @@ namespace OcularPlane
                 return;
             }
 
-            var property = instance.RawObject
-                .GetType()
+            PropertyInfo propertyInfo;
+            FieldInfo fieldInfo;
+            GetMemberInfo(propertyName, instance, out propertyInfo, out fieldInfo);
+
+
+            Type memberType = GetMemberType(propertyName, instance, propertyInfo, fieldInfo);
+
+            object valueToSet = GetValueToSet(propertyName, value, instance, ref memberType);
+
+            if(fieldInfo != null)
+            {
+                // todo: handle setting on structs:
+                // http://stackoverflow.com/questions/6280506/is-there-a-way-to-set-properties-on-struct-instances-using-reflection
+                fieldInfo.SetValue(instance.RawObject, valueToSet);
+            }
+            else // propertyInfo != null
+            {
+                // todo: handle setting on structs:
+                // http://stackoverflow.com/questions/6280506/is-there-a-way-to-set-properties-on-struct-instances-using-reflection
+                propertyInfo.SetValue(instance.RawObject, valueToSet);
+            }
+        }
+
+        private object GetValueToSet(string propertyName, string value, TrackedInstance instance, ref Type memberType)
+        {
+            object valueToSet = null;
+            if (value == null && (IsNullableType(memberType) || !memberType.IsValueType))
+            {
+                // keep it null
+                valueToSet = null;
+            }
+            else
+            {
+                memberType = ExtractNullableUnderlyingType(memberType);
+                var typeCode = GetCodeForType(memberType);
+                if (typeCode != TypeCode.Empty)
+                {
+                    valueToSet = ConvertType(propertyName, value, typeCode, instance, memberType);
+
+                }
+                else
+                {
+                    if (memberType.IsEnum)
+                    {
+                        valueToSet = ParseEnumValue(propertyName, value, memberType, instance);
+                    }
+                    else
+                    {
+                        throw new NoKnownWayToParseToTypeException(memberType);
+                    }
+                }
+            }
+
+            return valueToSet;
+        }
+
+        private static Type GetMemberType(string propertyName, TrackedInstance instance, PropertyInfo property, FieldInfo field)
+        {
+            Type memberType;
+            if (property == null && field == null)
+            {
+                throw new PropertyDoesntExistException(instance.RawObject.GetType(), propertyName);
+            }
+            else if (property != null)
+            {
+                memberType = property.PropertyType;
+            }
+            else // if field != null
+            {
+                memberType = field.FieldType;
+            }
+
+            return memberType;
+        }
+
+        private static void GetMemberInfo(string propertyName, TrackedInstance instance, out PropertyInfo property, out FieldInfo field)
+        {
+            property = null;
+            field = null;
+            var rawObjectType = instance.RawObject.GetType();
+
+            property = rawObjectType
                 .GetProperties()
                 .Where(x => x.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase))
                 .SingleOrDefault();
 
             if (property == null)
             {
-                throw new PropertyDoesntExistException(instance.RawObject.GetType(), propertyName);
-            }
-
-            if (value == null && (IsNullableType(property.PropertyType) || !property.PropertyType.IsValueType))
-            {
-                property.SetValue(instance.RawObject, null);
-            }
-            else
-            {
-                var propertyType = ExtractNullableUnderlyingType(property);
-                var typeCode = GetCodeForType(propertyType);
-                if (typeCode != TypeCode.Empty)
-                {
-                    ConvertType(propertyName, value, typeCode, instance, propertyType, property);
-                }
-                else
-                {
-                    if (propertyType.IsEnum)
-                    {
-                        ParseEnumValue(propertyName, value, propertyType, property, instance);
-                    }
-                    else
-                    {
-                        throw new NoKnownWayToParseToTypeException(propertyType);
-                    }
-                }
+                field = rawObjectType.GetFields().Where(x => x.Name.Equals(propertyName, StringComparison.OrdinalIgnoreCase)).SingleOrDefault();
             }
         }
 
-        private static void ParseEnumValue(string propertyName, string value, Type propertyType, PropertyInfo property, TrackedInstance instance)
+        private object ParseEnumValue(string propertyName, string value, Type propertyType, TrackedInstance instance)
         {
             if (propertyType.IsEnumDefined(value))
             {
                 var parsedValue = Enum.Parse(propertyType, value);
-                property.SetValue(instance.RawObject, parsedValue);
+                return parsedValue;
             }
             else
             {
                 throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
             }
+
+
         }
 
-        private static void ConvertType(string propertyName,
+        private static object ConvertType(string propertyName,
             string value,
             TypeCode typeCode,
             TrackedInstance instance,
-            Type propertyType,
-            PropertyInfo property)
+            Type propertyType)
         {
             object convertedValue;
 
@@ -127,17 +183,17 @@ namespace OcularPlane
                 throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
             }
 
-            property.SetValue(instance.RawObject, convertedValue);
+            return convertedValue;
         }
 
-        private static Type ExtractNullableUnderlyingType(PropertyInfo property)
+
+        private static Type ExtractNullableUnderlyingType(Type memberType)
         {
-            var propertyType = property.PropertyType;
-            if (IsNullableType(propertyType))
+            if (IsNullableType(memberType))
             {
-                propertyType = Nullable.GetUnderlyingType(propertyType);
+                memberType = Nullable.GetUnderlyingType(memberType);
             }
-            return propertyType;
+            return memberType;
         }
 
         private static bool IsNullableType(Type propertyType)
