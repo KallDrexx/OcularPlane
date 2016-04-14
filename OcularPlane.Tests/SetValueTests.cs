@@ -192,6 +192,36 @@ namespace OcularPlane.Tests
             }
         }
 
+        [Fact]
+        public void Can_Set_Nullable_Value()
+        {
+            var containerManager = new ContainerManager();
+            var testObject = new TestClass();
+
+            containerManager.AddObjectToContainer("container", testObject, "obj");
+            var reference = containerManager.GetInstancesInContainer("container")
+                .Single(x => x.Name == "obj");
+
+            containerManager.SetPropertyValue(reference.InstanceId, nameof(TestClass.NullableIntProperty), "151");
+
+            testObject.NullableIntProperty.Should().Be(151);
+        }
+
+        [Fact]
+        public void Can_Set_Reference_Type_To_Null()
+        {
+            var containerManager = new ContainerManager();
+            var testObject = new TestClass {UnknownClassProperty = new Unparseable()};
+
+            containerManager.AddObjectToContainer("container", testObject, "obj");
+            var reference = containerManager.GetInstancesInContainer("container")
+                .Single(x => x.Name == "obj");
+
+            containerManager.SetPropertyValue(reference.InstanceId, nameof(TestClass.UnknownClassProperty), null);
+
+            testObject.UnknownClassProperty.Should().BeNull();
+        }
+
         private class TestClass
         {
             public string StringProperty { get; set; }
@@ -201,6 +231,7 @@ namespace OcularPlane.Tests
             public bool BoolProperty { get; set; }
             public TestEnum EnumProperty { get; set; }
             public Unparseable UnknownClassProperty { get; set; }
+            public int? NullableIntProperty { get; set; }
         }
 
         private enum TestEnum { Unspecified, Specified }

@@ -70,41 +70,79 @@ namespace OcularPlane
                 throw new PropertyDoesntExistException(instance.RawObject.GetType(), propertyName);
             }
 
-            var typeCode = GetCodeForType(property.PropertyType);
-            if (typeCode != TypeCode.Empty)
+            if (value == null && (IsNullableType(property.PropertyType) || !property.PropertyType.IsValueType))
             {
-                object convertedValue;
-
-                try
-                {
-                    convertedValue = Convert.ChangeType(value, typeCode);
-                }
-                catch
-                {
-                    throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, property.PropertyType, value);
-                }
-
-                property.SetValue(instance.RawObject, convertedValue);
+                property.SetValue(instance.RawObject, null);
             }
             else
             {
-                if (property.PropertyType.IsEnum)
+                var propertyType = ExtractNullableUnderlyingType(property);
+                var typeCode = GetCodeForType(propertyType);
+                if (typeCode != TypeCode.Empty)
                 {
-                    if (property.PropertyType.IsEnumDefined(value))
-                    {
-                        var parsedValue = Enum.Parse(property.PropertyType, value);
-                        property.SetValue(instance.RawObject, parsedValue);
-                    }
-                    else
-                    {
-                        throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, property.PropertyType, value);
-                    }
+                    ConvertType(propertyName, value, typeCode, instance, propertyType, property);
                 }
                 else
                 {
-                    throw new NoKnownWayToParseToTypeException(property.PropertyType);
+                    if (propertyType.IsEnum)
+                    {
+                        ParseEnumValue(propertyName, value, propertyType, property, instance);
+                    }
+                    else
+                    {
+                        throw new NoKnownWayToParseToTypeException(propertyType);
+                    }
                 }
             }
+        }
+
+        private static void ParseEnumValue(string propertyName, string value, Type propertyType, PropertyInfo property, TrackedInstance instance)
+        {
+            if (propertyType.IsEnumDefined(value))
+            {
+                var parsedValue = Enum.Parse(propertyType, value);
+                property.SetValue(instance.RawObject, parsedValue);
+            }
+            else
+            {
+                throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
+            }
+        }
+
+        private static void ConvertType(string propertyName,
+            string value,
+            TypeCode typeCode,
+            TrackedInstance instance,
+            Type propertyType,
+            PropertyInfo property)
+        {
+            object convertedValue;
+
+            try
+            {
+                convertedValue = Convert.ChangeType(value, typeCode);
+            }
+            catch
+            {
+                throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
+            }
+
+            property.SetValue(instance.RawObject, convertedValue);
+        }
+
+        private static Type ExtractNullableUnderlyingType(PropertyInfo property)
+        {
+            var propertyType = property.PropertyType;
+            if (IsNullableType(propertyType))
+            {
+                propertyType = Nullable.GetUnderlyingType(propertyType);
+            }
+            return propertyType;
+        }
+
+        private static bool IsNullableType(Type propertyType)
+        {
+            return propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof (Nullable<>);
         }
 
         private static TypeCode GetCodeForType(Type type)
