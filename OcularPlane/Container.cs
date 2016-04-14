@@ -86,6 +86,25 @@ namespace OcularPlane
 
                 property.SetValue(instance.RawObject, convertedValue);
             }
+            else
+            {
+                if (property.PropertyType.IsEnum)
+                {
+                    if (property.PropertyType.IsEnumDefined(value))
+                    {
+                        var parsedValue = Enum.Parse(property.PropertyType, value);
+                        property.SetValue(instance.RawObject, parsedValue);
+                    }
+                    else
+                    {
+                        throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, property.PropertyType, value);
+                    }
+                }
+                else
+                {
+                    throw new NoKnownWayToParseToTypeException(property.PropertyType);
+                }
+            }
         }
 
         private static TypeCode GetCodeForType(Type type)
