@@ -10,6 +10,7 @@ using OcularPlane.Networking.WcfTcp.Client;
 using OcularPlane.Models;
 using FlatRedBall.Glue.Parsing;
 using Glue;
+using FlatRedBall.Glue.Plugins;
 
 namespace LiveUpdater
 {
@@ -48,25 +49,34 @@ namespace LiveUpdater
         }
 
         bool runningTimedEvent = false;
-        private void OnTimedEvent(object sender, ElapsedEventArgs e)
+        private void OnTimedEvent(object sender, ElapsedEventArgs ev)
         {
             if (!runningTimedEvent)
             {
                 runningTimedEvent = true;
-                UpdateIsConnected();
-
-                if (IsConnected)
+                try
                 {
-                    PullFromHost();
 
-                    UpdateGridCategories();
-                }
-                else
-                {
-                    MainGlueWindow.Self.Invoke(() =>
+                    UpdateIsConnected();
+
+                    if (IsConnected)
                     {
-                        grid.Categories.Clear();
-                    });
+                        PullFromHost();
+
+                        UpdateGridCategories();
+                    }
+                    else
+                    {
+                        MainGlueWindow.Self.Invoke(() =>
+                        {
+                            grid.Categories.Clear();
+                        });
+                    }
+                }
+                catch(Exception ex)
+                {
+                    // do nothing, just keep going...
+                    //PluginManager.ReceiveError("Unexpected error in Live Updater plugin:\n" + ex.ToString());
                 }
                 runningTimedEvent = false;
             }
