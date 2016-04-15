@@ -25,6 +25,9 @@ namespace LiveUpdater.CodeGeneration
             if (element is ScreenSave)
             {
                 codeBlock.Line("OcularPlane.Networking.WcfTcp.Host.OcularPlaneHost host;");
+                codeBlock.Line(
+                    "OcularPlane.ContainerManager containerManager = new OcularPlane.ContainerManager();");
+
             }
             return codeBlock;
         }
@@ -33,9 +36,6 @@ namespace LiveUpdater.CodeGeneration
         {
             if(element is ScreenSave)
             {
-                codeBlock.Line(
-                    "var containerManager = new OcularPlane.ContainerManager();");
-
                 string screenName = element.ClassName;
 
                 foreach (var namedObject in element.NamedObjects)
