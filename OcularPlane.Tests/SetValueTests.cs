@@ -222,6 +222,21 @@ namespace OcularPlane.Tests
             testObject.UnknownClassProperty.Should().BeNull();
         }
 
+        [Fact]
+        public void Can_Set_Field_To_Value()
+        {
+            var containerManager = new ContainerManager();
+            var testObject = new ClassWithField();
+
+            containerManager.AddObjectToContainer("container", testObject, "obj");
+            var reference = containerManager.GetInstancesInContainer("container")
+                .Single(x => x.Name == "obj");
+
+            containerManager.SetPropertyValue(reference.InstanceId, nameof(ClassWithField.IntField), "151");
+
+            testObject.IntField.Should().Be(151);
+        }
+
         private class TestClass
         {
             public string StringProperty { get; set; }
@@ -236,5 +251,6 @@ namespace OcularPlane.Tests
 
         private enum TestEnum { Unspecified, Specified }
         private class Unparseable { }
+        private class ClassWithField { public int IntField; }
     }
 }

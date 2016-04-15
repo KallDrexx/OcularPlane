@@ -42,6 +42,8 @@
   <ItemGroup>
     <Compile Include="InstanceDetails.cs" />
     <Compile Include="InstanceReference.cs" />
+    <Compile Include="MethodReference.cs" />
+    <Compile Include="ParameterReference.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyReference.cs" />
   </ItemGroup>

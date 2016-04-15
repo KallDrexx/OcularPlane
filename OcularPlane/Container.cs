@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using OcularPlane.Exceptions;
 using OcularPlane.InternalModels;
@@ -12,11 +13,18 @@ namespace OcularPlane
     class Container
     {
         private readonly ConcurrentDictionary<string, TrackedInstance> _objects = new ConcurrentDictionary<string, TrackedInstance>();
+        private readonly ConcurrentDictionary<string, TrackedMethod> _methods = new ConcurrentDictionary<string, TrackedMethod>();
 
         public void AddObject(object obj, string name)
         {
             var instance = new TrackedInstance(obj);
             _objects.AddOrUpdate(name, instance, (key, oldObject) => instance);
+        }
+
+        public void AddMethod(Expression<Action> methodExpression, string name)
+        {
+            var method = MethodExpressionParser.ParseToReference(methodExpression, name);
+            _methods.AddOrUpdate(name, method, (key, reference) => method);
         }
 
         public InstanceReference[] GetInstances()
@@ -80,6 +88,30 @@ namespace OcularPlane
                 // http://stackoverflow.com/questions/6280506/is-there-a-way-to-set-properties-on-struct-instances-using-reflection
                 propertyInfo.SetValue(instance.RawObject, valueToSet);
             }
+        }
+
+        public MethodReference[] GetMethods()
+        {
+            return _methods.Values.Select(x => x.Reference).ToArray();
+        }
+
+        public void ExecuteMethod(Guid methodId, Dictionary<string, string> parameterValues)
+        {
+            if (parameterValues == null)
+            {
+                throw new ArgumentNullException(nameof(parameterValues));
+            }
+
+            var method = _methods.Values
+                .Where(x => x.MethodId == methodId)
+                .SingleOrDefault();
+
+            if (method == null)
+            {
+                return;
+            }
+
+            ExecuteMethod(method, parameterValues);
         }
 
         private object GetValueToSet(string propertyName, string value, TrackedInstance instance, ref Type memberType)
@@ -228,6 +260,20 @@ namespace OcularPlane
             return map.TryGetValue(type, out code)
                 ? code
                 : TypeCode.Empty;
+        }
+
+        private static void ExecuteMethod(TrackedMethod trackedMethod, Dictionary<string, string> parameterValues)
+        {
+            var actualParameters = new List<object>();
+            foreach (var paramInfo in trackedMethod.MethodInfo.GetParameters())
+            {
+                var valueAsString = parameterValues[paramInfo.Name];
+                var typeCode = GetCodeForType(paramInfo.ParameterType);
+                var realValue = Convert.ChangeType(valueAsString, typeCode);
+                actualParameters.Add(realValue);
+            }
+
+            trackedMethod.MethodInfo.Invoke(trackedMethod.RelvantObject, actualParameters.ToArray());
         }
     }
 }
