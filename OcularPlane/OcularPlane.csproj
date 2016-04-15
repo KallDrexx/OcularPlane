@@ -46,6 +46,8 @@
     <Compile Include="Exceptions\NoKnownWayToParseToTypeException.cs" />
     <Compile Include="Exceptions\PropertyDoesntExistException.cs" />
     <Compile Include="InternalModels\TrackedInstance.cs" />
+    <Compile Include="InternalModels\TrackedMethod.cs" />
+    <Compile Include="MethodExpressionParser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
