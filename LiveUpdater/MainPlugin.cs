@@ -1,5 +1,7 @@
-﻿using FlatRedBall.Glue.Plugins;
+﻿using FlatRedBall.Glue.Parsing;
+using FlatRedBall.Glue.Plugins;
 using FlatRedBall.Glue.Plugins.Interfaces;
+using LiveUpdater.CodeGeneration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
@@ -12,7 +14,7 @@ namespace LiveUpdater
     [Export(typeof(PluginBase))]
     public class MainPlugin : PluginBase
     {
-
+        ObjectRegistrationCodeGenerator generator;
         Views.PropertiesControl control;
         PropertiesController controller;
 
@@ -34,6 +36,7 @@ namespace LiveUpdater
 
         public override bool ShutDown(PluginShutDownReason shutDownReason)
         {
+            CodeWriter.CodeGenerators.Remove(generator);
             return true;
         }
 
@@ -41,7 +44,11 @@ namespace LiveUpdater
         {
             AddGridToMiddle();
 
-
+            if (generator == null)
+            {
+                generator = new ObjectRegistrationCodeGenerator();
+            }
+            CodeWriter.CodeGenerators.Add(generator);
         }
 
         private void AddGridToMiddle()
