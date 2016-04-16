@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ServiceModel;
 using OcularPlane.Models;
 using OcularPlane.Networking.WcfTcp.Common;
@@ -40,6 +41,16 @@ namespace OcularPlane.Networking.WcfTcp.Client
         public void SetPropertyValue(Guid instanceId, string propertyName, string value)
         {
             _proxy.SetPropertyValue(instanceId, propertyName, value);
+        }
+
+        public MethodReference[] GetMethodsInContainer(string containerName)
+        {
+            return _proxy.GetMethodsInContainer(containerName);
+        }
+
+        public void ExecuteMethod(Guid methodId, Dictionary<string, string> parameters)
+        {
+            _proxy.ExecuteMethod(methodId, parameters);
         }
     }
 }

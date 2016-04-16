@@ -2,7 +2,6 @@
 {
     class TestObject
     {
-
         public float FloatField;
 
         public int IntValue { get; set; }
@@ -14,6 +13,13 @@
             Unspecified,
             Value1,
             Value2
+        }
+
+        public void SetProperties(int intVal, string stringVal, MyEnum enumVal)
+        {
+            IntValue = intVal;
+            StringValue = stringVal;
+            EnumValue = enumVal;
         }
     }
 }

@@ -8,9 +8,12 @@ namespace OcularPlane.Networking.TestHost
         static void Main(string[] args)
         {
             var containerManager = new ContainerManager();
-            containerManager.AddObjectToContainer("container1", new TestObject(), "testobject");
-            containerManager.AddObjectToContainer("container2", new TestObject(), "testobject2");
+            var testObject = new TestObject();
+            containerManager.AddObjectToContainer("container1", testObject, "testobject");
+            containerManager.AddMethodToContainer("container1", () => testObject.SetProperties(0, null, 0), "setTestValues");
 
+
+            containerManager.AddObjectToContainer("container2", new TestObject(), "testobject2");
             containerManager.AddObjectToContainer("GameScreen", 
                 new TestObject
                 {

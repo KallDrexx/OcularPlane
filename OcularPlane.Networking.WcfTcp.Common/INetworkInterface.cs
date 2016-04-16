@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ServiceModel;
 using OcularPlane.Models;
 
@@ -21,5 +22,11 @@ namespace OcularPlane.Networking.WcfTcp.Common
 
         [OperationContract]
         void SetPropertyValue(Guid instanceId, string propertyName, string value);
+
+        [OperationContract]
+        MethodReference[] GetMethodsInContainer(string containerName);
+
+        [OperationContract]
+        void ExecuteMethod(Guid methodId, Dictionary<string, string> parameters);
     }
 }
