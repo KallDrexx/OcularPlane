@@ -17,56 +17,80 @@ namespace OcularPlane
             if (methodExpression == null) throw new ArgumentNullException(nameof(methodExpression));
             if (string.IsNullOrWhiteSpace(storedName)) throw new ArgumentNullException(storedName);
 
-            var member = methodExpression.Body as MethodCallExpression;
-            if (member == null)
+            var methodCall = methodExpression.Body as MethodCallExpression;
+            if (methodCall == null)
             {
                 throw new ArgumentException("Expression is not a method");
             }
 
-            var memberInfo = member.Method;
-            var attachedObject = GetClassObject(methodExpression);
-            if (attachedObject == null)
+            var methodInfo = methodCall.Method;
+            var attachedObject = GetClassObject(methodCall);
+            if (!methodInfo.IsStatic && attachedObject == null)
             {
-                throw new InvalidOperationException("Could not find attached object in expression tree. Methods passed in with 'new Class().Method()' is not supported");
+                var message = @"Could not find object method is attached to.  Only static method calls, or calls with an explicit instance declared
+are allowed (e.g. ""() => instance.MethodCall()"".  ""this.MethodCall()"", ""MethodCall()"", and other variations are not supported";
+
+                throw new InvalidOperationException(message);
             }
 
+            ValidateMethodParameters(methodInfo);
+
             var methodId = Guid.NewGuid();
+            return CreateTrackedMethod(storedName, methodId, attachedObject, methodInfo);
+        }
+
+        private static TrackedMethod CreateTrackedMethod(string storedName, Guid methodId, object attachedObject, MethodInfo methodInfo)
+        {
             return new TrackedMethod
             {
                 MethodId = methodId,
                 RelvantObject = attachedObject,
-                MethodInfo = memberInfo,
+                MethodInfo = methodInfo,
                 Reference = new MethodReference
                 {
                     MethodId = methodId,
                     Name = storedName,
-                    Parameters = memberInfo.GetParameters()
-                    .Select(x => new ParameterReference
-                    {
-                        TypeName = x.ParameterType.FullName,
-                        ParameterName = x.Name
-                    })
-                    .ToArray()
+                    Parameters = methodInfo.GetParameters()
+                        .Select(x => new ParameterReference
+                        {
+                            TypeName = x.ParameterType.FullName,
+                            ParameterName = x.Name
+                        })
+                        .ToArray()
                 }
             };
         }
 
-        // From http://stackoverflow.com/a/3607659/231002
-        private static object GetClassObject(Expression<Action> expression)
+        private static object GetClassObject(MethodCallExpression methodCall)
         {
-            // The expression is a lambda expression with a method call body.
-            var lambda = (LambdaExpression)expression;
-            var methodCall = (MethodCallExpression)lambda.Body;
-            // The method is called on a member of some instance.
-            var member = (MemberExpression)methodCall.Object;
-            // The member expression contains an instance of the anonymous class that
-            // defines the member...
-            var constant = (ConstantExpression)member.Expression;
+            var member = methodCall.Object as MemberExpression;
+            var constant = member?.Expression as ConstantExpression;
+            if (constant == null)
+            {
+                return null;
+            }
+
             var anonymousClassInstance = constant.Value;
-            // ...and the member itself.
             var calledClassField = (FieldInfo)member.Member;
-            // With an instance of the anonymous class and the field, we can get its value.
+            
             return calledClassField.GetValue(anonymousClassInstance);
+        }
+
+        private static void ValidateMethodParameters(MethodInfo method)
+        {
+            var validations = new List<Func<ParameterInfo, bool>>
+            {
+                p => typeof (IConvertible).IsAssignableFrom(p.ParameterType)
+            };
+
+            var validationsPassed = method.GetParameters()
+                .Select(parameterInfo => validations.Any(validationFunction => validationFunction(parameterInfo)))
+                .All(x => x);
+
+            if (!validationsPassed)
+            {
+                throw new InvalidOperationException("Parameters of methods being added to containers must implement IConvertible");
+            }
         }
     }
 }

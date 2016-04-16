@@ -135,7 +135,7 @@ namespace OcularPlane
                 {
                     if (memberType.IsEnum)
                     {
-                        valueToSet = ParseEnumValue(propertyName, value, memberType, instance);
+                        valueToSet = SetEnumPropertyValue(propertyName, value, memberType, instance);
                     }
                     else
                     {
@@ -183,7 +183,7 @@ namespace OcularPlane
             }
         }
 
-        private object ParseEnumValue(string propertyName, string value, Type propertyType, TrackedInstance instance)
+        private object SetEnumPropertyValue(string propertyName, string value, Type propertyType, TrackedInstance instance)
         {
             if (propertyType.IsEnumDefined(value))
             {
@@ -192,7 +192,7 @@ namespace OcularPlane
             }
             else
             {
-                throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
+                throw new InvalidPropertyValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
             }
 
 
@@ -212,7 +212,7 @@ namespace OcularPlane
             }
             catch
             {
-                throw new InvalidValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
+                throw new InvalidPropertyValueConversionException(instance.RawObject.GetType(), propertyName, propertyType, value);
             }
 
             return convertedValue;
@@ -268,9 +268,25 @@ namespace OcularPlane
             foreach (var paramInfo in trackedMethod.MethodInfo.GetParameters())
             {
                 var valueAsString = parameterValues[paramInfo.Name];
-                var typeCode = GetCodeForType(paramInfo.ParameterType);
-                var realValue = Convert.ChangeType(valueAsString, typeCode);
-                actualParameters.Add(realValue);
+
+                if (paramInfo.ParameterType.IsEnum)
+                {
+                    if (paramInfo.ParameterType.IsEnumDefined(valueAsString))
+                    {
+                        var enumValue = Enum.Parse(paramInfo.ParameterType, valueAsString);
+                        actualParameters.Add(enumValue);
+                    }
+                    else
+                    {
+                        throw new InvalidParameterValueConversionException(trackedMethod.MethodInfo.Name, paramInfo.Name, paramInfo.ParameterType, valueAsString);
+                    }
+                }
+                else
+                {
+                    var typeCode = GetCodeForType(paramInfo.ParameterType);
+                    var realValue = Convert.ChangeType(valueAsString, typeCode);
+                    actualParameters.Add(realValue);
+                }
             }
 
             trackedMethod.MethodInfo.Invoke(trackedMethod.RelvantObject, actualParameters.ToArray());

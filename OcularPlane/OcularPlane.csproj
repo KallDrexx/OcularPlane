@@ -42,7 +42,8 @@
   <ItemGroup>
     <Compile Include="Container.cs" />
     <Compile Include="ContainerManager.cs" />
-    <Compile Include="Exceptions\InvalidValueConversionException.cs" />
+    <Compile Include="Exceptions\InvalidParameterValueConversionException.cs" />
+    <Compile Include="Exceptions\InvalidPropertyValueConversionException.cs" />
     <Compile Include="Exceptions\NoKnownWayToParseToTypeException.cs" />
     <Compile Include="Exceptions\PropertyDoesntExistException.cs" />
     <Compile Include="InternalModels\TrackedInstance.cs" />

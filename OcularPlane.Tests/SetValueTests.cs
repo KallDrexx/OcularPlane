@@ -48,7 +48,7 @@ namespace OcularPlane.Tests
                 containerManager.SetPropertyValue(reference.InstanceId, nameof(TestClass.IntProperty), "abc");
                 Assert.True(false, "Exception not thrown but expected");
             }
-            catch (InvalidValueConversionException ex)
+            catch (InvalidPropertyValueConversionException ex)
             {
                 ex.InstanceType.Should().Be(typeof(TestClass));
                 ex.PropertyName.Should().Be(nameof(TestClass.IntProperty));
@@ -183,7 +183,7 @@ namespace OcularPlane.Tests
                 containerManager.SetPropertyValue(reference.InstanceId, nameof(TestClass.EnumProperty), "abc");
                 Assert.True(false, "Exception not thrown but expected");
             }
-            catch (InvalidValueConversionException ex)
+            catch (InvalidPropertyValueConversionException ex)
             {
                 ex.InstanceType.Should().Be(typeof(TestClass));
                 ex.PropertyName.Should().Be(nameof(TestClass.EnumProperty));
