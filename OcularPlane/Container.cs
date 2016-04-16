@@ -291,5 +291,31 @@ namespace OcularPlane
 
             trackedMethod.MethodInfo.Invoke(trackedMethod.RelvantObject, actualParameters.ToArray());
         }
+
+        public void RemoveInstance(Guid instanceId)
+        {
+            var key =_objects.Where(x => x.Value.Id == instanceId)
+                .Select(x => x.Key)
+                .SingleOrDefault();
+
+            if (key != null)
+            {
+                TrackedInstance removedInstance;
+                _objects.TryRemove(key, out removedInstance);
+            }
+        }
+
+        public void RemoveMethod(Guid methodId)
+        {
+            var key = _methods.Where(x => x.Value.MethodId == methodId)
+                .Select(x => x.Key)
+                .SingleOrDefault();
+
+            if (key != null)
+            {
+                TrackedMethod removedMethod;
+                _methods.TryRemove(key, out removedMethod);
+            }
+        }
     }
 }

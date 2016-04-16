@@ -164,10 +164,24 @@ namespace OcularPlane.Tests
             details.Properties[0].ValueAsString.Should().Be("1");
         }
 
+        [Fact]
+        public void Can_Remove_Instance_From_Container()
+        {
+            var containerManager = new ContainerManager();
+
+            containerManager.AddObjectToContainer("container", this, "obj");
+            var instance = containerManager.GetInstancesInContainer("container").First();
+            containerManager.RemoveInstance(instance.InstanceId);
+
+            var results = containerManager.GetInstancesInContainer("container");
+            results.Length.Should().Be(0);
+        }
+
         private class TestClass
         {
             public string StringProperty { get; set; }
             public int NumberProperty { get; set; }
+            public void Method() { }
         }
 
         private class ClassWithField

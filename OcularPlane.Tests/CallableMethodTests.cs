@@ -105,6 +105,21 @@ namespace OcularPlane.Tests
             testClass.EnumProperty.Should().Be(TestClass.TestEnum.Specified);
         }
 
+        [Fact]
+        public void Can_Remove_Method_From_Container()
+        {
+            var test = new TestClass();
+            var containerManager = new ContainerManager();
+
+            containerManager.AddMethodToContainer("container", () => test.SimpleMethod(0, null), "methodName");
+            var method = containerManager.GetMethodsInContainer("container").First();
+
+            containerManager.RemoveMethod(method.MethodId);
+            var methods = containerManager.GetMethodsInContainer("container");
+
+            methods.Length.Should().Be(0);
+        }
+
         private class TestClass
         {
             public enum TestEnum
@@ -131,7 +146,7 @@ namespace OcularPlane.Tests
             {
                 EnumProperty = value;
             }
-        }      
+        }
 
         private static int StaticInt { get; set; }
         private static void StaticTestMethod(int value)

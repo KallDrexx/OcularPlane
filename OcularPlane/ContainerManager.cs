@@ -69,18 +69,34 @@ namespace OcularPlane
         public void SetPropertyValue(Guid instanceId, string propertyName, string value)
         {
             // TODO: Cache container<->InstanceId associations
-            foreach (var containerPair in _containers)
+            foreach (var container in _containers.Values)
             {
-                containerPair.Value.SetInstancePropertyValue(instanceId, propertyName, value);
+                container.SetInstancePropertyValue(instanceId, propertyName, value);
             }
         }
 
         public void ExecuteMethod(Guid methodId, Dictionary<string, string> parameters)
         {
             // TODO: Cache method id associations
-            foreach (var containerPair in _containers)
+            foreach (var container in _containers.Values)
             {
-                containerPair.Value.ExecuteMethod(methodId, parameters);
+                container.ExecuteMethod(methodId, parameters);
+            }
+        }
+
+        public void RemoveInstance(Guid instanceId)
+        {
+            foreach (var container in _containers.Values)
+            {
+                container.RemoveInstance(instanceId);
+            }
+        }
+
+        public void RemoveMethod(Guid methodId)
+        {
+            foreach (var container in _containers.Values)
+            {
+                container.RemoveMethod(methodId);
             }
         }
     }
