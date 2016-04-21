@@ -17,9 +17,14 @@ namespace OcularPlane
 
         public void AddObject(object obj, string name)
         {
-            var instance = new TrackedInstance(obj);
-            instance.Name = name;
-            _objects.AddOrUpdate(instance.Id, instance, (key, oldObject) => instance);
+            var previousInstances = _objects.Values.Where(x => x.Name == name).ToArray();
+            foreach (var previousInstance in previousInstances)
+            {
+                RemoveInstance(previousInstance.Id);
+            }
+
+            var instance = new TrackedInstance(obj) {Name = name};
+            _objects.TryAdd(instance.Id, instance);
         }
 
         public void AddMethod(Expression<Action> methodExpression, string name)
