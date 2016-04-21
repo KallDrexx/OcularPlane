@@ -177,6 +177,46 @@ namespace OcularPlane.Tests
             results.Length.Should().Be(0);
         }
 
+        [Fact]
+        public void Can_Tell_If_Properties_Are_Read_Or_Write_Only()
+        {
+            var containerManager = new ContainerManager();
+            var testObject = new ReadWriteOnlyTestClass {WriteOnlyProperty = 33};
+
+            containerManager.AddObjectToContainer("container", testObject, "obj");
+            var reference = containerManager.GetInstancesInContainer("container")
+                .Single(x => x.Name == "obj");
+
+            var details = containerManager.GetInstanceDetails(reference.InstanceId);
+
+            details.Properties.Length.Should().Be(2);
+
+            var readProperty = details.Properties.Single(x => x.Name == nameof(ReadWriteOnlyTestClass.ReadOnlyProperty));
+            readProperty.IsReadable.Should().BeTrue();
+            readProperty.IsWritable.Should().BeFalse();
+            readProperty.ValueAsString.Should().Be("33");
+
+            var writeProperty = details.Properties.Single(x => x.Name == nameof(ReadWriteOnlyTestClass.WriteOnlyProperty));
+            writeProperty.IsReadable.Should().BeFalse();
+            writeProperty.IsWritable.Should().BeTrue();
+            writeProperty.ValueAsString.Should().BeNull();
+        }
+
+        [Fact]
+        public void Indexer_Properties_Are_Ignored()
+        {
+            var containerManager = new ContainerManager();
+            var testObject = new IndexerClass();
+
+            containerManager.AddObjectToContainer("container", testObject, "obj");
+            var reference = containerManager.GetInstancesInContainer("container")
+                .Single(x => x.Name == "obj");
+
+            var details = containerManager.GetInstanceDetails(reference.InstanceId);
+
+            details.Properties.Length.Should().Be(0);
+        }
+
         private class TestClass
         {
             public string StringProperty { get; set; }
@@ -187,6 +227,25 @@ namespace OcularPlane.Tests
         private class ClassWithField
         {
             public int IntField;
+        }
+
+        private class ReadWriteOnlyTestClass
+        {
+            private int _internalValue;
+
+            public int ReadOnlyProperty => _internalValue;
+            public int WriteOnlyProperty { set { _internalValue = value; } }
+        }
+
+        private class IndexerClass
+        {
+            private readonly int[] _array = new[] {1, 2, 3, 4, 5};
+
+            public int this[int index]
+            {
+                get { return _array[index]; }
+                set { _array[index] = value; }
+            }
         }
     }
 }

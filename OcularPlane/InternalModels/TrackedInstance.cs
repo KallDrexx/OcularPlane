@@ -22,28 +22,32 @@ namespace OcularPlane.InternalModels
         public PropertyReference[] GetProperties()
         {
             var type = RawObject.GetType();
-
             var propertyInfos = type.GetProperties();
-
             List<PropertyReference> toReturn = new List<PropertyReference>();
 
             foreach(var propertyInfo in propertyInfos)
             {
-                try
+                if (propertyInfo.GetIndexParameters().Any())
                 {
-                    var reference = new PropertyReference();
-                    reference.Name = propertyInfo.Name;
-                    reference.TypeName = propertyInfo.PropertyType.FullName;
+                    // Ignore indexer properties
+                    continue;
+                }
+
+                var reference = new PropertyReference
+                {
+                    Name = propertyInfo.Name,
+                    IsWritable = propertyInfo.CanWrite,
+                    IsReadable = propertyInfo.CanRead,
+                    TypeName = propertyInfo.PropertyType.FullName
+                };
+
+                if (propertyInfo.CanRead)
+                {
                     var valueAsObject = propertyInfo.GetValue(RawObject);
                     reference.ValueAsString = Convert.ToString(valueAsObject);
+                }
 
-                    toReturn.Add(reference);
-                }
-                // This can happen if the property 
-                catch(Exception e)
-                {
-                    int m = 3;
-                }
+                toReturn.Add(reference);
             }
 
             var fields = type
