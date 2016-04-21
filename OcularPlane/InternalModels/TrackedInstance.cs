@@ -10,6 +10,7 @@ namespace OcularPlane.InternalModels
         public Guid Id { get; }
         public object RawObject { get; }
         public string Name { get; set; }
+        public Guid? ParentId { get; set; }
 
         public TrackedInstance(object obj)
         {

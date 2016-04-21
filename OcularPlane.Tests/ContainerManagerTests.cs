@@ -23,11 +23,12 @@ namespace OcularPlane.Tests
         {
             var containerManager = new ContainerManager();
 
-            containerManager.AddObjectToContainer("container", this, "obj");
+            var instanceId = containerManager.AddObjectToContainer("container", this, "obj");
             var results = containerManager.GetInstancesInContainer("container");
 
             results.Should().NotBeNull();
             results.Length.Should().Be(1);
+            results[0].InstanceId.Should().Be(instanceId);
             results[0].Should().NotBeNull();
             results[0].Name.Should().Be("obj");
             results[0].TypeName.Should().Be(this.GetType().FullName);
@@ -215,6 +216,19 @@ namespace OcularPlane.Tests
             var details = containerManager.GetInstanceDetails(reference.InstanceId);
 
             details.Properties.Length.Should().Be(0);
+        }
+
+        [Fact]
+        public void Can_Mark_Instance_As_Child_Of_Another_Instance()
+        {
+            var containerManager = new ContainerManager();
+
+            var parentId = containerManager.AddObjectToContainer("container", this, "parent");
+            var childId = containerManager.AddObjectToContainer("container", this, "child", parentId);
+
+            var details = containerManager.GetInstanceDetails(childId);
+
+            details.ParentInstanceId.Should().Be(parentId);
         }
 
         private class TestClass

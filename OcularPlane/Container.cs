@@ -15,7 +15,7 @@ namespace OcularPlane
         private readonly ConcurrentDictionary<Guid, TrackedInstance> _objects = new ConcurrentDictionary<Guid, TrackedInstance>();
         private readonly ConcurrentDictionary<Guid, TrackedMethod> _methods = new ConcurrentDictionary<Guid, TrackedMethod>();
 
-        public void AddObject(object obj, string name)
+        public Guid AddObject(object obj, string name, Guid? parentId)
         {
             var previousInstances = _objects.Values.Where(x => x.Name == name).ToArray();
             foreach (var previousInstance in previousInstances)
@@ -23,11 +23,17 @@ namespace OcularPlane
                 RemoveInstance(previousInstance.Id);
             }
 
-            var instance = new TrackedInstance(obj) {Name = name};
+            var instance = new TrackedInstance(obj)
+            {
+                Name = name,
+                ParentId = parentId
+            };
+
             _objects.TryAdd(instance.Id, instance);
+            return instance.Id;
         }
 
-        public void AddMethod(Expression<Action> methodExpression, string name)
+        public Guid AddMethod(Expression<Action> methodExpression, string name)
         {
             var previousMethods = _methods.Values.Where(x => x.Name == name).ToArray();
             foreach (var previousMethod in previousMethods)
@@ -37,6 +43,8 @@ namespace OcularPlane
 
             var method = MethodExpressionParser.ParseToReference(methodExpression, name);
             _methods.TryAdd(method.MethodId, method);
+
+            return method.MethodId;
         }
 
         public InstanceReference[] GetInstances()
@@ -65,6 +73,7 @@ namespace OcularPlane
             {
                 InstanceId = instanceId,
                 Name = foundObject.Name,
+                ParentInstanceId = foundObject.ParentId,
                 Properties = foundObject.GetProperties(),
             };
 

@@ -11,20 +11,20 @@ namespace OcularPlane
     {
         private readonly ConcurrentDictionary<string, Container> _containers = new ConcurrentDictionary<string, Container>();
 
-        public void AddObjectToContainer(string containerName, object obj, string objectName)
+        public Guid AddObjectToContainer(string containerName, object obj, string objectName, Guid? parentId = null)
         {
             _containers.TryAdd(containerName, new Container());
 
             var container = _containers[containerName];
-            container.AddObject(obj, objectName);
+            return container.AddObject(obj, objectName, parentId);
         }
 
-        public void AddMethodToContainer(string containerName, Expression<Action> methodExpression, string methodName)
+        public Guid AddMethodToContainer(string containerName, Expression<Action> methodExpression, string methodName)
         {
             _containers.TryAdd(containerName, new Container());
 
             var container = _containers[containerName];
-            container.AddMethod(methodExpression, methodName);
+            return container.AddMethod(methodExpression, methodName);
         }
 
         public string[] GetContainerNames()

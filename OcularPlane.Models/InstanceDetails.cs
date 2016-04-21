@@ -6,6 +6,7 @@ namespace OcularPlane.Models
     {
         public Guid InstanceId { get; set; }
         public string Name { get; set; }
+        public Guid? ParentInstanceId { get; set; }
         public PropertyReference[] Properties { get; set; }
 
         public InstanceDetails()
