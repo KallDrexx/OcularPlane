@@ -2,12 +2,14 @@
 using FlatRedBall.Glue.Plugins;
 using FlatRedBall.Glue.Plugins.Interfaces;
 using LiveUpdater.CodeGeneration;
+using LiveUpdater.Views;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FlatRedBall.Glue.Controls;
 
 namespace LiveUpdater
 {
@@ -15,8 +17,11 @@ namespace LiveUpdater
     public class MainPlugin : PluginBase
     {
         ObjectRegistrationCodeGenerator generator;
-        Views.PropertiesControl control;
+        Views.PropertiesControl propertiesControl;
+        RuntimeObjectListView runtimeObjectListView;
+
         PropertiesController controller;
+        private PluginTab runtimeObjectsTab;
 
         public override string FriendlyName
         {
@@ -30,7 +35,7 @@ namespace LiveUpdater
         {
             get
             {
-                return new Version();
+                return new Version(0,1);
             }
         }
 
@@ -42,7 +47,17 @@ namespace LiveUpdater
 
         public override void StartUp()
         {
+            controller = new PropertiesController();
+
+            propertiesControl = new Views.PropertiesControl();
+            runtimeObjectListView = new RuntimeObjectListView();
+
+            controller.Grid = propertiesControl.DataGrid;
+            controller.ListView = runtimeObjectListView;
+
             AddGridToMiddle();
+
+            ShowRuntimeList();
 
             if (generator == null)
             {
@@ -51,14 +66,23 @@ namespace LiveUpdater
             CodeWriter.CodeGenerators.Add(generator);
         }
 
+        private void ShowRuntimeList()
+        {
+            if(runtimeObjectsTab == null)
+            {
+                runtimeObjectsTab = base.AddToTab(PluginManager.RightTab, runtimeObjectListView, "Runtime Objects");
+            }
+            else
+            {
+                base.ShowTab(runtimeObjectsTab);
+            }
+        }
+
         private void AddGridToMiddle()
         {
-            control = new Views.PropertiesControl();
 
-            base.AddToTab(PluginManager.CenterTab, control, "Runtime Variables");
+            base.AddToTab(PluginManager.CenterTab, propertiesControl, "Runtime Variables");
 
-            controller = new PropertiesController();
-            controller.Grid = control.DataGrid;
 
         }
     }

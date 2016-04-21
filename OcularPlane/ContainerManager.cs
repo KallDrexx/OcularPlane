@@ -60,10 +60,17 @@ namespace OcularPlane
 
         public InstanceDetails GetInstanceDetails(Guid instanceId)
         {
-            // TODO: Implement caching for performance
-            return _containers.Select(x => x.Value.GetInstanceDetails(instanceId))
-                .Where(x => x != null)
-                .SingleOrDefault();
+            foreach(var item in _containers)
+            {
+                var instanceDetails = item.Value.GetInstanceDetails(instanceId);
+
+                if(instanceDetails != null)
+                {
+                    return instanceDetails;
+                }
+            }
+            return null;
+            
         }
 
         public void SetPropertyValue(Guid instanceId, string propertyName, string value)
@@ -81,6 +88,14 @@ namespace OcularPlane
             foreach (var container in _containers.Values)
             {
                 container.ExecuteMethod(methodId, parameters);
+            }
+        }
+
+        public void RemoveInstanceByObject(object whatToRemove)
+        {
+            foreach (var container in _containers.Values)
+            {
+                container.RemoveInstanceByObject(whatToRemove);
             }
         }
 

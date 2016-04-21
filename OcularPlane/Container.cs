@@ -12,13 +12,14 @@ namespace OcularPlane
 {
     class Container
     {
-        private readonly ConcurrentDictionary<string, TrackedInstance> _objects = new ConcurrentDictionary<string, TrackedInstance>();
+        private readonly ConcurrentDictionary<Guid, TrackedInstance> _objects = new ConcurrentDictionary<Guid, TrackedInstance>();
         private readonly ConcurrentDictionary<string, TrackedMethod> _methods = new ConcurrentDictionary<string, TrackedMethod>();
 
         public void AddObject(object obj, string name)
         {
             var instance = new TrackedInstance(obj);
-            _objects.AddOrUpdate(name, instance, (key, oldObject) => instance);
+            instance.Name = name;
+            _objects.AddOrUpdate(instance.Id, instance, (key, oldObject) => instance);
         }
 
         public void AddMethod(Expression<Action> methodExpression, string name)
@@ -35,7 +36,7 @@ namespace OcularPlane
                 results.Add(new InstanceReference
                 {
                     InstanceId = pair.Value.Id,
-                    Name = pair.Key,
+                    Name = pair.Value.Name,
                     TypeName = pair.Value.RawObject.GetType().FullName
                 });
             }
@@ -45,14 +46,22 @@ namespace OcularPlane
 
         public InstanceDetails GetInstanceDetails(Guid instanceId)
         {
-            return _objects.Where(x => x.Value.Id == instanceId)
-                .Select(x => new InstanceDetails
+            var foundObject = _objects[instanceId];
+
+            if(foundObject != null)
+            {
+                var toReturn = new InstanceDetails
                 {
                     InstanceId = instanceId,
-                    Name = x.Key,
-                    Properties = x.Value.GetProperties()
-                })
-                .SingleOrDefault();
+                    Name = foundObject.Name,
+                };
+
+                toReturn.Properties = foundObject.GetProperties();
+
+                return toReturn;
+            }
+            return null;
+            
         }
 
         public void SetInstancePropertyValue(Guid instanceId, string propertyName, string value)
@@ -290,6 +299,16 @@ namespace OcularPlane
             }
 
             trackedMethod.MethodInfo.Invoke(trackedMethod.RelvantObject, actualParameters.ToArray());
+        }
+
+        public void RemoveInstanceByObject(object objectToRemove)
+        {
+            var kvp = _objects.FirstOrDefault(item => item.Value.RawObject == objectToRemove);
+            if(kvp.Value != null)
+            {
+                TrackedInstance throwaway;
+                _objects.TryRemove(kvp.Key, out throwaway);
+            }
         }
 
         public void RemoveInstance(Guid instanceId)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using OcularPlane.Models;
+using System.Collections.Generic;
 
 namespace OcularPlane.InternalModels
 {
@@ -8,6 +9,7 @@ namespace OcularPlane.InternalModels
     {
         public Guid Id { get; }
         public object RawObject { get; }
+        public string Name { get; set; }
 
         public TrackedInstance(object obj)
         {
@@ -19,18 +21,32 @@ namespace OcularPlane.InternalModels
 
         public PropertyReference[] GetProperties()
         {
-            // TODO: Should cache for performance
-            var properties = RawObject.GetType()
-                .GetProperties()
-                .Select(x => new PropertyReference
-                {
-                    Name = x.Name,
-                    TypeName = x.PropertyType.FullName,
-                    ValueAsString = Convert.ToString(x.GetValue(RawObject))
-                })
-                .ToList();
+            var type = RawObject.GetType();
 
-            var fields = RawObject.GetType()
+            var propertyInfos = type.GetProperties();
+
+            List<PropertyReference> toReturn = new List<PropertyReference>();
+
+            foreach(var propertyInfo in propertyInfos)
+            {
+                try
+                {
+                    var reference = new PropertyReference();
+                    reference.Name = propertyInfo.Name;
+                    reference.TypeName = propertyInfo.PropertyType.FullName;
+                    var valueAsObject = propertyInfo.GetValue(RawObject);
+                    reference.ValueAsString = Convert.ToString(valueAsObject);
+
+                    toReturn.Add(reference);
+                }
+                // This can happen if the property 
+                catch(Exception e)
+                {
+                    int m = 3;
+                }
+            }
+
+            var fields = type
                 .GetFields()
                 .Select(x => new PropertyReference
                 {
@@ -40,9 +56,9 @@ namespace OcularPlane.InternalModels
                 })
                 .ToList();
 
-            properties.AddRange(fields);
+            toReturn.AddRange(fields);
             
-            return properties.ToArray();
+            return toReturn.ToArray();
 
         }
 

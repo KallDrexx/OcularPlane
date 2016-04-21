@@ -11,14 +11,18 @@ using OcularPlane.Models;
 using FlatRedBall.Glue.Parsing;
 using Glue;
 using FlatRedBall.Glue.Plugins;
+using LiveUpdater.ViewModels;
+using LiveUpdater.Views;
+using System.ComponentModel;
 
 namespace LiveUpdater
 {
     public class PropertiesController
     {
-        InstanceReference[] instances = new InstanceReference[0];
+        public List<InstanceReference> instances = new List<InstanceReference>();
         System.Timers.Timer timer;
 
+        RuntimeObjectListViewModel objectListViewModel = new RuntimeObjectListViewModel();
 
         OcularPlaneClient client;
 
@@ -29,6 +33,24 @@ namespace LiveUpdater
         {
             get { return grid; }
             set { grid = value; }
+        }
+
+        RuntimeObjectListView listView;
+        public RuntimeObjectListView ListView
+        {
+            get
+            {
+                return listView;
+            }
+            set
+            {
+                listView = value;
+
+                if(listView != null)
+                {
+                    listView.DataContext = objectListViewModel;
+                }
+            }
         }
 
         public bool IsConnected { get; private set; }
@@ -70,6 +92,7 @@ namespace LiveUpdater
                         MainGlueWindow.Self.Invoke(() =>
                         {
                             grid.Categories.Clear();
+                            this.objectListViewModel.MenuItems.Clear();
                         });
                     }
                 }
@@ -89,11 +112,58 @@ namespace LiveUpdater
 
         private void PullFromHost()
         {
-            var currentScreen = GlueState.Self.CurrentScreenSave;
-            if (currentScreen != null)
+            instances.Clear();
+
+            instances.AddRange(
+                client.GetInstancesInContainer("CurrentScreen"));
+
+
+            UpdateListView();
+        }
+
+        private void UpdateListView()
+        {
+            MainGlueWindow.Self.Invoke(() =>
             {
-                instances = client.GetInstancesInContainer(currentScreen.ClassName);
-            }
+                var existingUiItems = objectListViewModel.MenuItems;
+                //ListView.Items.Cast<CustomMenuItem<InstanceReference>>().ToList();
+
+                HashSet<CustomMenuItem<InstanceReference>> visitedUiItems = new HashSet<CustomMenuItem<InstanceReference>>();
+
+                foreach (var item in instances)
+                {
+                    var foundItem = existingUiItems
+                        .FirstOrDefault(uiItem => (uiItem.Tag as InstanceReference).InstanceId == item.InstanceId);
+
+                    var alreadyPartOfList = foundItem != null;
+
+                    if (!alreadyPartOfList)
+                    {
+
+                        var menuItem = new CustomMenuItem<InstanceReference>();
+                        menuItem.Title = item.Name;
+                        menuItem.Tag = item;
+                        objectListViewModel.MenuItems.Add(menuItem);
+
+                        visitedUiItems.Add(menuItem);
+                    }
+                    else
+                    {
+                        visitedUiItems.Add(foundItem);
+                    }
+                }
+
+                // Remove any items which haven't been visited:
+                for(int i = objectListViewModel.MenuItems.Count -1; i > -1; i--)
+                {
+                    var removalCandidate = objectListViewModel.MenuItems[i];
+
+                    if(!visitedUiItems.Contains(removalCandidate))
+                    {
+                        objectListViewModel.MenuItems.RemoveAt(i);
+                    }
+                }
+            });
         }
 
         private void UpdateIsConnected()
@@ -120,16 +190,11 @@ namespace LiveUpdater
         {
             MainGlueWindow.Self.Invoke(() =>
             {
-
-                var glueNamedObject = GlueState.Self.CurrentNamedObjectSave;
-                var instanceName = glueNamedObject?.InstanceName;
-
-                var foundInstance = instances.FirstOrDefault(item => item.Name == instanceName);
-
-                if (foundInstance != null)
+                var selectedInstance = objectListViewModel?.SelectedItem?.Tag;
+                if (selectedInstance != null)
                 {
 
-                    bool shouldReconstructGrid = lastInstanceGuid != foundInstance.InstanceId;
+                    bool shouldReconstructGrid = lastInstanceGuid != selectedInstance.InstanceId;
 
                     if (shouldReconstructGrid)
                     {
@@ -138,20 +203,20 @@ namespace LiveUpdater
                         var mainCategory = new MemberCategory("Main Variables");
                         var debuggingCategory = new MemberCategory("Debugging Variables");
 
-                        var details = client.GetInstanceDetails(foundInstance.InstanceId);
+                        var details = client.GetInstanceDetails(selectedInstance.InstanceId);
                         foreach (var property in details.Properties)
                         {
                             var member = new ConnectedInstanceMember();
                             member.Client = client;
-                            member.InstanceReference = foundInstance;
+                            member.InstanceReference = selectedInstance;
                             member.PropertyReference = property;
                             member.Type = TypeManager.GetTypeFromString(property.TypeName);
 
                             member.Name = property.Name;
                             member.DisplayName = FlatRedBall.Utilities.StringFunctions.InsertSpacesInCamelCaseString(member.Name);
 
-
-                            bool shouldAppearInMainList = glueNamedObject.HasCustomVariable(member.Name);
+                            // eventually find the matching NOS and update it.
+                            bool shouldAppearInMainList = false;// glueNamedObject.HasCustomVariable(member.Name);
 
                             if (shouldAppearInMainList)
                             {
@@ -172,11 +237,11 @@ namespace LiveUpdater
                             grid.Categories.Add(debuggingCategory);
                         }
 
-                        lastInstanceGuid = foundInstance.InstanceId;
+                        lastInstanceGuid = selectedInstance.InstanceId;
                     }
                     else
                     {
-                        var details = client.GetInstanceDetails(foundInstance.InstanceId);
+                        var details = client.GetInstanceDetails(selectedInstance.InstanceId);
 
                         foreach (var category in grid.Categories)
                         {

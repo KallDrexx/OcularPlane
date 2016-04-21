@@ -40,11 +40,34 @@ namespace LiveUpdater.CodeGeneration
 
                 foreach (var namedObject in element.NamedObjects)
                 {
-                    bool shouldAddAsObject = namedObject.IsList == false;
-                    if (shouldAddAsObject)
+                    if (namedObject.IsList)
                     {
+                        var instanceName = namedObject.InstanceName;
+                        codeBlock.Line($"this.{instanceName}.CollectionChanged += (sender, args) =>");
+                        var block1 = codeBlock.Block();
+                        {
+                            var block2 = block1.If("args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add");
+                            {
+                                var foreachBlock = block2.ForEach("var item in args.NewItems");
+                                {
+                                    foreachBlock.Line($"containerManager.AddObjectToContainer(\"CurrentScreen\", item, \"{instanceName}.\" + item.GetType().Name + \"Instance\");");
+                                }
+                            }
+                            block2 = block1.ElseIf("args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove");
+                            {
+                                var foreachBlock = block2.ForEach("var item in args.OldItems");
+                                {
+                                    foreachBlock.Line("containerManager.RemoveInstanceByObject(item);");
+                                }
+                            }
+                        };
+                        codeBlock.Line(";");
+                    }
+                    else
+                    {
+
                         string line =
-                            $"containerManager.AddObjectToContainer(nameof({screenName}), " +
+                            $"containerManager.AddObjectToContainer(\"CurrentScreen\", " +
                             $"{namedObject.InstanceName}, nameof({namedObject.InstanceName}));";
 
                         codeBlock.Line(line);
