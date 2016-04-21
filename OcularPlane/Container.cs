@@ -13,7 +13,7 @@ namespace OcularPlane
     class Container
     {
         private readonly ConcurrentDictionary<Guid, TrackedInstance> _objects = new ConcurrentDictionary<Guid, TrackedInstance>();
-        private readonly ConcurrentDictionary<string, TrackedMethod> _methods = new ConcurrentDictionary<string, TrackedMethod>();
+        private readonly ConcurrentDictionary<Guid, TrackedMethod> _methods = new ConcurrentDictionary<Guid, TrackedMethod>();
 
         public void AddObject(object obj, string name)
         {
@@ -29,52 +29,52 @@ namespace OcularPlane
 
         public void AddMethod(Expression<Action> methodExpression, string name)
         {
+            var previousMethods = _methods.Values.Where(x => x.Name == name).ToArray();
+            foreach (var previousMethod in previousMethods)
+            {
+                RemoveMethod(previousMethod.MethodId);
+            }
+
             var method = MethodExpressionParser.ParseToReference(methodExpression, name);
-            _methods.AddOrUpdate(name, method, (key, reference) => method);
+            _methods.TryAdd(method.MethodId, method);
         }
 
         public InstanceReference[] GetInstances()
         {
-            var results = new List<InstanceReference>();
-            foreach (var pair in _objects)
-            {
-                results.Add(new InstanceReference
+            return _objects.Values
+                .Select(x => new InstanceReference
                 {
-                    InstanceId = pair.Value.Id,
-                    Name = pair.Value.Name,
-                    TypeName = pair.Value.RawObject.GetType().FullName
-                });
-            }
-
-            return results.ToArray();
+                    InstanceId = x.Id,
+                    Name = x.Name,
+                    TypeName = x.RawObject.GetType().FullName
+                })
+                .ToArray();
         }
 
         public InstanceDetails GetInstanceDetails(Guid instanceId)
         {
-            var foundObject = _objects[instanceId];
+            TrackedInstance foundObject;
+            _objects.TryGetValue(instanceId, out foundObject);
 
-            if(foundObject != null)
+            if (foundObject == null)
             {
-                var toReturn = new InstanceDetails
-                {
-                    InstanceId = instanceId,
-                    Name = foundObject.Name,
-                };
-
-                toReturn.Properties = foundObject.GetProperties();
-
-                return toReturn;
+                return null;
             }
-            return null;
-            
+
+            var toReturn = new InstanceDetails
+            {
+                InstanceId = instanceId,
+                Name = foundObject.Name,
+                Properties = foundObject.GetProperties(),
+            };
+
+            return toReturn;
         }
 
         public void SetInstancePropertyValue(Guid instanceId, string propertyName, string value)
         {
-            var instance = _objects.Where(x => x.Value.Id == instanceId)
-                .Select(x => x.Value)
-                .SingleOrDefault();
-
+            TrackedInstance instance;
+            _objects.TryGetValue(instanceId, out instance);
             if (instance == null)
             {
                 // We don't have this instance.  May need to eventually throw here but for now let it pass
@@ -85,10 +85,8 @@ namespace OcularPlane
             FieldInfo fieldInfo;
             GetMemberInfo(propertyName, instance, out propertyInfo, out fieldInfo);
 
-
-            Type memberType = GetMemberType(propertyName, instance, propertyInfo, fieldInfo);
-
-            object valueToSet = GetValueToSet(propertyName, value, instance, ref memberType);
+            var memberType = GetMemberType(propertyName, instance, propertyInfo, fieldInfo);
+            var valueToSet = GetValueToSet(propertyName, value, instance, ref memberType);
 
             if(fieldInfo != null)
             {
@@ -116,16 +114,34 @@ namespace OcularPlane
                 throw new ArgumentNullException(nameof(parameterValues));
             }
 
-            var method = _methods.Values
-                .Where(x => x.MethodId == methodId)
-                .SingleOrDefault();
-
-            if (method == null)
+            TrackedMethod method;
+            _methods.TryGetValue(methodId, out method);
+            if (method != null)
             {
-                return;
+                ExecuteMethod(method, parameterValues);
             }
+        }
 
-            ExecuteMethod(method, parameterValues);
+        public void RemoveInstanceByObject(object objectToRemove)
+        {
+            var kvp = _objects.FirstOrDefault(item => item.Value.RawObject == objectToRemove);
+            if (kvp.Value != null)
+            {
+                TrackedInstance throwaway;
+                _objects.TryRemove(kvp.Key, out throwaway);
+            }
+        }
+
+        public void RemoveInstance(Guid instanceId)
+        {
+            TrackedInstance removedInstance;
+            _objects.TryRemove(instanceId, out removedInstance);
+        }
+
+        public void RemoveMethod(Guid methodId)
+        {
+            TrackedMethod removedMethod;
+            _methods.TryRemove(methodId, out removedMethod);
         }
 
         private object GetValueToSet(string propertyName, string value, TrackedInstance instance, ref Type memberType)
@@ -304,42 +320,6 @@ namespace OcularPlane
             }
 
             trackedMethod.MethodInfo.Invoke(trackedMethod.RelvantObject, actualParameters.ToArray());
-        }
-
-        public void RemoveInstanceByObject(object objectToRemove)
-        {
-            var kvp = _objects.FirstOrDefault(item => item.Value.RawObject == objectToRemove);
-            if(kvp.Value != null)
-            {
-                TrackedInstance throwaway;
-                _objects.TryRemove(kvp.Key, out throwaway);
-            }
-        }
-
-        public void RemoveInstance(Guid instanceId)
-        {
-            var key =_objects.Where(x => x.Value.Id == instanceId)
-                .Select(x => x.Key)
-                .SingleOrDefault();
-
-            if (key != null)
-            {
-                TrackedInstance removedInstance;
-                _objects.TryRemove(key, out removedInstance);
-            }
-        }
-
-        public void RemoveMethod(Guid methodId)
-        {
-            var key = _methods.Where(x => x.Value.MethodId == methodId)
-                .Select(x => x.Key)
-                .SingleOrDefault();
-
-            if (key != null)
-            {
-                TrackedMethod removedMethod;
-                _methods.TryRemove(key, out removedMethod);
-            }
         }
     }
 }

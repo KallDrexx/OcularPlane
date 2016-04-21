@@ -44,6 +44,7 @@ are allowed (e.g. ""() => instance.MethodCall()"".  ""this.MethodCall()"", ""Met
             return new TrackedMethod
             {
                 MethodId = methodId,
+                Name = storedName,
                 RelvantObject = attachedObject,
                 MethodInfo = methodInfo,
                 Reference = new MethodReference
