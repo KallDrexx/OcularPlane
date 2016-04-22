@@ -17,6 +17,22 @@ namespace LiveUpdater.ViewModels
             private set;
         } = new ObservableCollection<CustomMenuItem<InstanceReference>>();
 
+        public IEnumerable<CustomMenuItem<InstanceReference>> AllMenuItems
+        {
+            get
+            {
+                foreach(var item in MenuItems)
+                {
+                    yield return item;
+
+                    foreach(var subItem in item.AllMenuItems)
+                    {
+                        yield return subItem;
+                    }
+                }
+            }
+        }
+
         CustomMenuItem<InstanceReference> selectedItem;
         public CustomMenuItem<InstanceReference> SelectedItem
         {
@@ -30,6 +46,24 @@ namespace LiveUpdater.ViewModels
                 {
                     selectedItem = value;
                     base.NotifyPropertyChanged(nameof(SelectedItem));
+                }
+            }
+        }
+
+        internal void RemoveFromParent(CustomMenuItem<InstanceReference> whatToRemove)
+        {
+            if (MenuItems.Contains(whatToRemove))
+            {
+                MenuItems.Remove(whatToRemove);
+            }
+            else
+            {
+                foreach (var item in MenuItems)
+                {
+                    if(item.RemoveFromParent(whatToRemove))
+                    {
+                        break;
+                    }
                 }
             }
         }

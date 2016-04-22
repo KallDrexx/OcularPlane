@@ -7,5 +7,10 @@ namespace OcularPlane.Models
         public Guid InstanceId { get; set; }
         public string Name { get; set; }
         public string TypeName { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

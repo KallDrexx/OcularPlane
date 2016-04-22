@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using OcularPlane.Models;
 
 namespace LiveUpdater.ViewModels
 {
@@ -18,6 +19,22 @@ namespace LiveUpdater.ViewModels
     public class CustomMenuItem<T>  : CustomMenuBase
     {
         public T Tag { get; set; }
+
+        public IEnumerable<CustomMenuItem<T>> AllMenuItems
+        {
+            get
+            {
+                foreach (var item in Items)
+                {
+                    yield return item;
+
+                    foreach (var subItem in item.AllMenuItems)
+                    {
+                        yield return subItem;
+                    }
+                }
+            }
+        }
 
         public override object TagAsObject
         {
@@ -35,6 +52,29 @@ namespace LiveUpdater.ViewModels
             this.Items = new ObservableCollection<CustomMenuItem<T>>();
         }
 
+        internal bool RemoveFromParent(CustomMenuItem<T> whatToRemove)
+        {
+            if(Items.Contains(whatToRemove))
+            {
+                Items.Remove(whatToRemove);
+                return true;
+            }
+            else
+            {
+                foreach(var item in Items)
+                {
+                    if(item.RemoveFromParent(whatToRemove))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
 
+        public override string ToString()
+        {
+            return "Menu Item " + Tag.ToString();
+        }
     }
 }

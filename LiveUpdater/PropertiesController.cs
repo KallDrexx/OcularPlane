@@ -19,6 +19,8 @@ namespace LiveUpdater
 {
     public class PropertiesController
     {
+        #region Fields
+
         public List<InstanceReference> instances = new List<InstanceReference>();
         System.Timers.Timer timer;
 
@@ -27,6 +29,10 @@ namespace LiveUpdater
         OcularPlaneClient client;
 
         Guid lastInstanceGuid = Guid.Empty;
+
+        #endregion
+
+        #region Properties
 
         WpfDataUi.DataUiGrid grid;
         public WpfDataUi.DataUiGrid Grid
@@ -54,6 +60,8 @@ namespace LiveUpdater
         }
 
         public bool IsConnected { get; private set; }
+
+        #endregion
 
         public PropertiesController()
         {
@@ -125,12 +133,14 @@ namespace LiveUpdater
         {
             MainGlueWindow.Self.Invoke(() =>
             {
-                var existingUiItems = objectListViewModel.MenuItems;
+                var existingUiItems = objectListViewModel.AllMenuItems;
                 //ListView.Items.Cast<CustomMenuItem<InstanceReference>>().ToList();
 
                 HashSet<CustomMenuItem<InstanceReference>> visitedUiItems = new HashSet<CustomMenuItem<InstanceReference>>();
 
-                foreach (var item in instances)
+                var orderedInstances = instances.OrderBy(item => item.Name.Contains(".")).ToList();
+
+                foreach (var item in orderedInstances)
                 {
                     var foundItem = existingUiItems
                         .FirstOrDefault(uiItem => (uiItem.Tag as InstanceReference).InstanceId == item.InstanceId);
@@ -140,12 +150,29 @@ namespace LiveUpdater
                     if (!alreadyPartOfList)
                     {
 
-                        var menuItem = new CustomMenuItem<InstanceReference>();
-                        menuItem.Title = item.Name;
-                        menuItem.Tag = item;
-                        objectListViewModel.MenuItems.Add(menuItem);
+                        var newMenuItem = new CustomMenuItem<InstanceReference>();
+                        newMenuItem.Title = item.Name;
+                        newMenuItem.Tag = item;
 
-                        visitedUiItems.Add(menuItem);
+                        bool addedAsSubitem = false;
+                        if(item.Name.Contains("."))
+                        {
+                            var parentName = item.Name.Substring(0, item.Name.IndexOf('.'));
+
+                            var parentMenuItem = objectListViewModel.AllMenuItems.FirstOrDefault(parentCandidate => parentCandidate.Tag.Name == parentName);
+
+                            if (parentMenuItem != null)
+                            {
+                                addedAsSubitem = true;
+                                parentMenuItem.Items.Add(newMenuItem);
+                            }
+                        }
+
+                        if (!addedAsSubitem)
+                        {
+                            objectListViewModel.MenuItems.Add(newMenuItem);
+                        }
+                        visitedUiItems.Add(newMenuItem);
                     }
                     else
                     {
@@ -153,14 +180,22 @@ namespace LiveUpdater
                     }
                 }
 
-                // Remove any items which haven't been visited:
-                for(int i = objectListViewModel.MenuItems.Count -1; i > -1; i--)
+                var allItems = objectListViewModel.AllMenuItems.ToList();
+                foreach(var removalCandidate in allItems)
                 {
-                    var removalCandidate = objectListViewModel.MenuItems[i];
+                    // Remove any items which haven't been visited:
+                    bool shouldRemoveItem = !visitedUiItems.Contains(removalCandidate);
 
-                    if(!visitedUiItems.Contains(removalCandidate))
+                    if (shouldRemoveItem)
                     {
-                        objectListViewModel.MenuItems.RemoveAt(i);
+                        if(objectListViewModel.MenuItems.Contains(removalCandidate))
+                        {
+                            objectListViewModel.MenuItems.Remove(removalCandidate);
+                        }
+                        else
+                        {
+                            objectListViewModel.RemoveFromParent(removalCandidate);
+                        }
                     }
                 }
             });

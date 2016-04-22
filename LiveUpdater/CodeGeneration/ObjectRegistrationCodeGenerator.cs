@@ -42,33 +42,11 @@ namespace LiveUpdater.CodeGeneration
                 {
                     if (namedObject.IsList)
                     {
-                        var instanceName = namedObject.InstanceName;
-                        codeBlock.Line($"this.{instanceName}.CollectionChanged += (sender, args) =>");
-                        var block1 = codeBlock.Block();
-                        {
-                            var block2 = block1.If("args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add");
-                            {
-                                var foreachBlock = block2.ForEach("var item in args.NewItems");
-                                {
-                                    foreachBlock.Line($"containerManager.AddObjectToContainer(\"CurrentScreen\", item, \"{instanceName}.\" + item.GetType().Name + \"Instance\");");
-                                }
-                            }
-                            block2 = block1.ElseIf("args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove");
-                            {
-                                var foreachBlock = block2.ForEach("var item in args.OldItems");
-                                {
-                                    foreachBlock.Line("containerManager.RemoveInstanceByObject(item);");
-                                }
-                            }
-                        };
-                        codeBlock.Line(";");
+                        GenerateList(codeBlock, namedObject);
                     }
                     else
                     {
-
-                        string line =
-                            $"containerManager.AddObjectToContainer(\"CurrentScreen\", " +
-                            $"{namedObject.InstanceName}, nameof({namedObject.InstanceName}));";
+                        string line = GetAddToContainerStringFor(namedObject);
 
                         codeBlock.Line(line);
                     }
@@ -79,6 +57,41 @@ namespace LiveUpdater.CodeGeneration
 
 
             return codeBlock;
+        }
+
+        private static string GetAddToContainerStringFor(NamedObjectSave namedObject)
+        {
+            return $"containerManager.AddObjectToContainer(\"CurrentScreen\", " +
+                $"{namedObject.InstanceName}, nameof({namedObject.InstanceName}));";
+        }
+
+        private static void GenerateList(ICodeBlock codeBlock, NamedObjectSave namedObject)
+        {
+            codeBlock = codeBlock.Block();
+            {
+                codeBlock.Line($"var listId = {GetAddToContainerStringFor(namedObject)};");
+
+                var instanceName = namedObject.InstanceName;
+                codeBlock.Line($"this.{instanceName}.CollectionChanged += (sender, args) =>");
+                var block1 = codeBlock.Block();
+                {
+                    var block2 = block1.If("args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Add");
+                    {
+                        var foreachBlock = block2.ForEach("var item in args.NewItems");
+                        {
+                            foreachBlock.Line($"containerManager.AddObjectToContainer(\"CurrentScreen\", item, \"{instanceName}.\" + item.GetType().Name + \"Instance\", listId);");
+                        }
+                    }
+                    block2 = block1.ElseIf("args.Action == System.Collections.Specialized.NotifyCollectionChangedAction.Remove");
+                    {
+                        var foreachBlock = block2.ForEach("var item in args.OldItems");
+                        {
+                            foreachBlock.Line("containerManager.RemoveInstanceByObject(item);");
+                        }
+                    }
+                };
+                codeBlock.Line(";");
+            }
         }
 
         public override void GenerateRemoveFromManagers(ICodeBlock codeBlock, IElement element)
