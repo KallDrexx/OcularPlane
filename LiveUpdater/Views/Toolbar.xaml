@@ -1,0 +1,24 @@
+﻿<UserControl x:Class="LiveUpdater.Views.Toolbar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:LiveUpdater.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="22" d:DesignWidth="300">
+    <StackPanel Orientation="Horizontal">
+        <!--<Button Margin="0,0,0,0" Width="26" Height="22">
+            <Image Source="/LiveUpdater;component/Content/RestartGame.png"></Image>
+        </Button>-->
+
+        <Button Margin="2,0,0,0" Width="24" Height="22">
+            <Image Source="/LiveUpdater;component/Content/RestartScreen.png"></Image>
+        </Button>
+
+        <Button Margin="2,0,0,0" Width="24" Height="22">
+            <Image Source="/LiveUpdater;component/Content/PauseIcon.png"></Image>
+        </Button>
+
+
+    </StackPanel>
+</UserControl>

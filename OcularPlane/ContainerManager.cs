@@ -27,6 +27,17 @@ namespace OcularPlane
             return container.AddMethod(methodExpression, methodName);
         }
 
+        public void ClearObjects(string containerName)
+        {
+            if(_containers.ContainsKey(containerName))
+            {
+                var containerToClear = _containers[containerName];
+
+                containerToClear.ClearObjects();
+            }
+
+        }
+
         public string[] GetContainerNames()
         {
             return _containers.Keys.ToArray();

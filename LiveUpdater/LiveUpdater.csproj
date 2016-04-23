@@ -105,6 +105,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Views\Toolbar.xaml.cs">
+      <DependentUpon>Toolbar.xaml</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="CodeGeneration\EntireFiles\OcularPlaneManager.cs" />
+    <Compile Include="CodeGeneration\EmbeddedCodeAdder.cs" />
     <Compile Include="CodeGeneration\ObjectRegistrationCodeGenerator.cs" />
     <Compile Include="ConnectedInstanceMember.cs" />
     <Compile Include="MainPlugin.cs" />
@@ -158,6 +163,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Toolbar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\OcularPlane.Models\OcularPlane.Models.csproj">
@@ -172,6 +181,15 @@
       <Project>{1ebc938b-8945-40e3-af27-6f0fae03f293}</Project>
       <Name>OcularPlane.Networking.WcfTcp.Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Content\PauseIcon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Content\RestartGame.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Content\RestartScreen.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

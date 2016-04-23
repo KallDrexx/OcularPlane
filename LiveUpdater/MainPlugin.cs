@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FlatRedBall.Glue.Controls;
+using Glue;
 
 namespace LiveUpdater
 {
@@ -22,6 +23,8 @@ namespace LiveUpdater
 
         PropertiesController controller;
         private PluginTab runtimeObjectsTab;
+
+        Toolbar toolbar;
 
         public override string FriendlyName
         {
@@ -47,7 +50,30 @@ namespace LiveUpdater
 
         public override void StartUp()
         {
+            AddUi();
+
+            if (generator == null)
+            {
+                generator = new ObjectRegistrationCodeGenerator();
+                CodeWriter.CodeGenerators.Add(generator);
+            }
+
+            base.ReactToLoadedGlux += HandleGluxLoaded;
+
+
+        }
+
+        private void HandleGluxLoaded()
+        {
+            EmbeddedCodeAdder.AddEmbeddedCode();
+
+        }
+
+        private void AddUi()
+        {
             controller = new PropertiesController();
+
+            controller.ConnectedChanged += HandleConnectedChanged;
 
             propertiesControl = new Views.PropertiesControl();
             runtimeObjectListView = new RuntimeObjectListView();
@@ -59,11 +85,23 @@ namespace LiveUpdater
 
             ShowRuntimeList();
 
-            if (generator == null)
+            toolbar = new Toolbar();
+        }
+
+        private void HandleConnectedChanged(object sender, EventArgs e)
+        {
+            MainGlueWindow.Self.Invoke(() =>
             {
-                generator = new ObjectRegistrationCodeGenerator();
-            }
-            CodeWriter.CodeGenerators.Add(generator);
+                if(controller.IsConnected)
+                {
+                    AddToToolBar(toolbar, "Runtime");
+                }
+                else
+                {
+                    RemoveFromToolbar(toolbar, "Runtime");
+                }
+
+            });
         }
 
         private void ShowRuntimeList()

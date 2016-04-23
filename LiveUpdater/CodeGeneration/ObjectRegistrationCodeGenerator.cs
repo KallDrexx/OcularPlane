@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FlatRedBall.Glue.Plugins.Interfaces;
 using FlatRedBall.Glue.CodeGeneration.CodeBuilder;
 using FlatRedBall.Glue.SaveClasses;
+using FlatRedBall.Glue.Plugins.ExportedImplementations;
 
 namespace LiveUpdater.CodeGeneration
 {
@@ -24,9 +25,8 @@ namespace LiveUpdater.CodeGeneration
         {
             if (element is ScreenSave)
             {
-                codeBlock.Line("OcularPlane.Networking.WcfTcp.Host.OcularPlaneHost host;");
                 codeBlock.Line(
-                    "OcularPlane.ContainerManager containerManager = new OcularPlane.ContainerManager();");
+                    "OcularPlane.ContainerManager containerManager;");
 
             }
             return codeBlock;
@@ -36,6 +36,9 @@ namespace LiveUpdater.CodeGeneration
         {
             if(element is ScreenSave)
             {
+                string projectNamespace = GlueState.Self.ProjectNamespace;
+                codeBlock.Line(
+                    $"containerManager = {projectNamespace}.OcularPlaneRuntime.OcularPlaneManager.GetContainerManager();");
                 string screenName = element.ClassName;
 
                 foreach (var namedObject in element.NamedObjects)
@@ -51,8 +54,6 @@ namespace LiveUpdater.CodeGeneration
                         codeBlock.Line(line);
                     }
                 }
-                codeBlock.Line(
-                    "host = new OcularPlane.Networking.WcfTcp.Host.OcularPlaneHost(containerManager, \"localhost\", 9999);");
             }
 
 
@@ -96,10 +97,24 @@ namespace LiveUpdater.CodeGeneration
 
         public override void GenerateRemoveFromManagers(ICodeBlock codeBlock, IElement element)
         {
+            GenerateClearContainerManager(codeBlock, element);
+        }
+
+        private static void GenerateClearContainerManager(ICodeBlock codeBlock, IElement element)
+        {
             if (element is ScreenSave)
             {
-                codeBlock.Line("host.Dispose();");
+                string projectNamespace = GlueState.Self.ProjectNamespace;
+                string line =
+                    $"{projectNamespace}.OcularPlaneRuntime.OcularPlaneManager.GetContainerManager().ClearObjects(\"CurrentScreen\");";
+                codeBlock.Line(line);
             }
+        }
+
+        public override ICodeBlock GenerateDestroy(ICodeBlock codeBlock, IElement element)
+        {
+            GenerateClearContainerManager(codeBlock, element);
+            return codeBlock;
         }
     }
 }

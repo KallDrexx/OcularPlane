@@ -63,6 +63,8 @@ namespace LiveUpdater
 
         #endregion
 
+        public event EventHandler ConnectedChanged;
+
         public PropertiesController()
         {
             CreateTimer();
@@ -218,7 +220,11 @@ namespace LiveUpdater
                 succeeded = false;
             }
 
-            this.IsConnected = succeeded;
+            if (this.IsConnected != succeeded)
+            {
+                this.IsConnected = succeeded;
+                ConnectedChanged?.Invoke(this, null);
+            }
         }
 
         private void UpdateGridCategories()

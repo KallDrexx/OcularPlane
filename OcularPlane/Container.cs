@@ -48,6 +48,11 @@ namespace OcularPlane
             return method.MethodId;
         }
 
+        public void ClearObjects()
+        {
+            _objects.Clear();
+        }
+
         public InstanceReference[] GetInstances()
         {
             return _objects.Values
