@@ -72,29 +72,6 @@ namespace OcularPlane.Tests
         }
 
         [Fact]
-        public void Storing_A_New_Object_With_The_Same_Name_In_The_Same_Container_Replaces_Object()
-        {
-            var containerManager = new ContainerManager();
-            var testObj1 = new TestClass();
-            var testObj2 = new TestClass();
-
-            containerManager.AddObjectToContainer("container", testObj1, "obj");
-            var instanceId = containerManager.GetInstancesInContainer("container")
-                .Select(x => x.InstanceId)
-                .FirstOrDefault();
-
-            containerManager.AddObjectToContainer("container", testObj2, "obj");
-            var results = containerManager.GetInstancesInContainer("container");
-
-            results.Should().NotBeNull();
-            results.Length.Should().Be(1);
-            results[0].Should().NotBeNull();
-            results[0].Name.Should().Be("obj");
-            results[0].TypeName.Should().Be(typeof(TestClass).FullName);
-            results[0].InstanceId.Should().NotBe(instanceId);
-        }
-
-        [Fact]
         public void Same_Object_In_Different_Containers_Has_Different_Instance_Id()
         {
             var containerManager = new ContainerManager();
