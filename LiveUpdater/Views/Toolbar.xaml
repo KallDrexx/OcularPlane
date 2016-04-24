@@ -11,11 +11,11 @@
             <Image Source="/LiveUpdater;component/Content/RestartGame.png"></Image>
         </Button>-->
 
-        <Button Margin="2,0,0,0" Width="24" Height="22">
+        <Button Margin="2,0,0,0" Width="24" Height="22" Click="RestartScreenClickedInternal">
             <Image Source="/LiveUpdater;component/Content/RestartScreen.png"></Image>
         </Button>
 
-        <Button Margin="2,0,0,0" Width="24" Height="22">
+        <Button Margin="2,0,0,0" Width="24" Height="22" Click="PauseClickedInternal">
             <Image Source="/LiveUpdater;component/Content/PauseIcon.png"></Image>
         </Button>
 

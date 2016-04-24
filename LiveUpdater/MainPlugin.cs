@@ -86,19 +86,34 @@ namespace LiveUpdater
             ShowRuntimeList();
 
             toolbar = new Toolbar();
+            toolbar.PauseClicked += HandlePauseClicked;
+            toolbar.RestartScreenClicked += HandleRestartScreenClicked;
+        }
+
+        private void HandleRestartScreenClicked(object sender, EventArgs e)
+        {
+            controller.RestartScreen();
+        }
+
+        private void HandlePauseClicked(object sender, EventArgs e)
+        {
+            controller.PauseScreen();
         }
 
         private void HandleConnectedChanged(object sender, EventArgs e)
         {
+            // Event calling doesn't currently work like I'd like it to.
+            // I want to be able to call this.PauseThisScreen, but I don't think
+            // I can. Need to talk to Matt about it
             MainGlueWindow.Self.Invoke(() =>
             {
                 if(controller.IsConnected)
                 {
-                    AddToToolBar(toolbar, "Runtime");
+                    //AddToToolBar(toolbar, "Runtime");
                 }
                 else
                 {
-                    RemoveFromToolbar(toolbar, "Runtime");
+                    //RemoveFromToolbar(toolbar, "Runtime");
                 }
 
             });

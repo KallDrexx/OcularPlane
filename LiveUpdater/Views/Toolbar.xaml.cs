@@ -20,9 +20,22 @@ namespace LiveUpdater.Views
     /// </summary>
     public partial class Toolbar : UserControl
     {
+        public event EventHandler PauseClicked;
+        public event EventHandler RestartScreenClicked;
+
         public Toolbar()
         {
             InitializeComponent();
+        }
+
+        private void PauseClickedInternal(object sender, RoutedEventArgs e)
+        {
+            PauseClicked?.Invoke(this, null);
+        }
+
+        private void RestartScreenClickedInternal(object sender, RoutedEventArgs e)
+        {
+            RestartScreenClicked?.Invoke(this, null);
         }
     }
 }

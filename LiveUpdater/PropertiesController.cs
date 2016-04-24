@@ -115,6 +115,26 @@ namespace LiveUpdater
             }
         }
 
+        internal void RestartScreen()
+        {
+            var methods = client.GetMethodsInContainer("CurrentScreen");
+
+
+        }
+
+        internal void PauseScreen()
+        {
+            var methods = client.GetMethodsInContainer("CurrentScreen");
+
+            var foundMethod = methods.FirstOrDefault(item => item.Name == "PauseThisScreen");
+
+            if(foundMethod != null)
+            {
+                client.ExecuteMethod(foundMethod.MethodId, new Dictionary<string, string>());
+            }
+
+        }
+
         private void HideGrid()
         {
             throw new NotImplementedException();
