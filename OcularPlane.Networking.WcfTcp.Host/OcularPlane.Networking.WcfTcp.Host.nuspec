@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>1.0.0</version>
+    <title>Ocular Plane</title>
+    <authors>Matthew Shapiro and Victor Chelaru</authors>
+    <owners>Matthew Shapiro</owners>
+    <licenseUrl>https://github.com/KallDrexx/OcularPlane/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/KallDrexx/OcularPlane</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>OcularPlane is a library that allows users to remotely track data from a live running application, as well as remotely update that data at any time.</description>
+    <releaseNotes>First Release</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+  </metadata>
+</package>
