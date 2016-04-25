@@ -17,13 +17,6 @@ namespace OcularPlane
 
         public Guid AddObject(object obj, string name, Guid? parentId)
         {
-            // We shouldn't make the name the unique ID - items can exist in a list and have the same name
-            //var previousInstances = _objects.Values.Where(x => x.Name == name).ToArray();
-            //foreach (var previousInstance in previousInstances)
-            //{
-            //    RemoveInstance(previousInstance.Id);
-            //}
-
             var instance = new TrackedInstance(obj)
             {
                 Name = name,
