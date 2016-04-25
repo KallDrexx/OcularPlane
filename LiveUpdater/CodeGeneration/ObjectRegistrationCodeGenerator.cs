@@ -36,6 +36,7 @@ namespace LiveUpdater.CodeGeneration
         {
             if(element is ScreenSave)
             {
+                codeBlock.Line("#if DEBUG");
                 string projectNamespace = GlueState.Self.ProjectNamespace;
                 codeBlock.Line(
                     $"containerManager = {projectNamespace}.OcularPlaneRuntime.OcularPlaneManager.GetContainerManager();");
@@ -54,6 +55,7 @@ namespace LiveUpdater.CodeGeneration
                         codeBlock.Line(line);
                     }
                 }
+                codeBlock.Line("#endif");
             }
 
 
@@ -104,10 +106,14 @@ namespace LiveUpdater.CodeGeneration
         {
             if (element is ScreenSave)
             {
+                codeBlock.Line("#if DEBUG");
+
                 string projectNamespace = GlueState.Self.ProjectNamespace;
                 string line =
                     $"{projectNamespace}.OcularPlaneRuntime.OcularPlaneManager.GetContainerManager().ClearObjects(\"CurrentScreen\");";
                 codeBlock.Line(line);
+                codeBlock.Line("#endif");
+
             }
         }
 
